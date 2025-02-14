@@ -2,6 +2,7 @@ package com.ssafy.goose.domain.news.service.bias;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.goose.domain.news.entity.ReferenceNewsArticle;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -16,20 +17,20 @@ import java.util.Map;
 @Service
 public class AnalyseByContent {
     private final RestTemplate restTemplate = new RestTemplate();
-    private static final String CONTENT_COMPARE_CONTENTS_API_URL = "http://i12d208.p.ssafy.io:5058/content-compare-contents";
+    private static final String CONTENT_COMPARE_CONTENTS_API_URL = "http://localhost:5062/content-compare-contents";
 
-    public double checkContentWithReference(String content, List<String> referenceContents) {
+    public double checkContentWithReference(String newsId, List<ReferenceNewsArticle> referenceNewsList) {
         try {
-            int totalArticles = referenceContents.size();
+            int totalArticles = referenceNewsList.size();
             if (totalArticles == 0) return 0.0; // 데이터가 없으면 0 반환
 
             double totalScore = 0.0;
 
-            for (String referenceContent : referenceContents) {
+            for (ReferenceNewsArticle referenceNews : referenceNewsList) {
                 // ✅ 요청 데이터 생성
                 Map<String, String> requestBody = new HashMap<>();
-                requestBody.put("content", content);
-                requestBody.put("referenceContent", referenceContent);
+                requestBody.put("newsId", newsId);
+                requestBody.put("referenceNewsId", referenceNews.getId());
 
                 // ✅ HTTP 요청 설정
                 HttpHeaders headers = new HttpHeaders();

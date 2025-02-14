@@ -7,6 +7,7 @@ import chromadb
 from sentence_transformers import SentenceTransformer
 import numpy as np
 import torch
+import os
 
 # OpenAI API Key 설정 (실제 키로 교체)
 openai.api_key = os.environ.get("OPENAI_API_KEY", "")

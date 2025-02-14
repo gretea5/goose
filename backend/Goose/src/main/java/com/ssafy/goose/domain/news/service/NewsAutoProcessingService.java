@@ -6,6 +6,7 @@ import com.ssafy.goose.domain.news.service.bias.BiasAnalyseService;
 import com.ssafy.goose.domain.news.service.bias.BiasAnalysisResult;
 import com.ssafy.goose.domain.news.service.crawling.NewsContentScraping;
 import com.ssafy.goose.domain.news.service.paragraph.NewsParagraphSplitService;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -56,11 +57,15 @@ public class NewsAutoProcessingService {
 
             System.out.println("문단 분리 수행 완료, 문단 갯수 : " + paragraphs.size());
 
+
+            String newsId = new ObjectId().toString();
+
             // 5. 편향성 분석 수행 (문단별 신뢰도/분석 사유 포함)
-            BiasAnalysisResult analysisResult = biasAnalyseService.analyzeBiasMyNews(cleanTitle, content, paragraphs);
+            BiasAnalysisResult analysisResult = biasAnalyseService.analyzeBias(newsId, cleanTitle, content, paragraphs);
 
             // 6. MongoDB 저장 객체 생성 (분석 결과 반영)
             NewsArticle article = NewsArticle.builder()
+                    .id(newsId)
                     .title(cleanTitle)
                     .originalLink((String) item.get("originallink"))
                     .naverLink(link)

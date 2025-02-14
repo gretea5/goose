@@ -4,12 +4,14 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'news_paragraph_reliability'
         DOCKER_CONTAINER = 'news_paragraph_reliability-container'
-        DOCKER_PORT = '5059'
+        DOCKER_PORT = '5061'
         DOCKER_PATH = credentials('DOCKER_PATH')
 
         EC2_USER = credentials('EC2_USER')
         EC2_IP = credentials('EC2_IP')
         SSH_KEY = credentials('SSH_KEY')
+
+        OPENAI_API_KEY = credentials('OPENAI_API_KEY')        
 
         PYTHON_VERSION = '3.9'
     }
@@ -65,7 +67,11 @@ pipeline {
                                     docker rm ${DOCKER_CONTAINER} || true
                                     docker rmi ${DOCKER_IMAGE}:latest || true
                                     docker load < ${DOCKER_PATH}/news_paragraph_reliability.tar.gz
-                                    docker run -d --name ${DOCKER_CONTAINER} -p ${DOCKER_PORT}:${DOCKER_PORT} ${DOCKER_IMAGE}:latest
+                                    docker run -d \
+                                      --name ${DOCKER_CONTAINER} \
+                                      -p ${DOCKER_PORT}:${DOCKER_PORT} \
+                                      -e OPENAI_API_KEY=${OPENAI_API_KEY} \                                      
+                                      ${DOCKER_IMAGE}:latest
                                 """.stripIndent()
                             )
                         ]

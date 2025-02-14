@@ -1,0 +1,95 @@
+pipeline {
+    agent any
+
+    environment {
+        // Docker 관련 설정
+        DOCKER_IMAGE = 'news_embedding_update'
+        DOCKER_CONTAINER = 'news_embedding_update-container'
+        // 이 스크립트는 내부에서 실행되므로 별도의 포트 매핑이 필요 없을 수 있음.
+        DOCKER_PATH = credentials('DOCKER_PATH')
+        
+        // EC2 접속 정보
+        EC2_USER = credentials('EC2_USER')
+        EC2_IP = credentials('EC2_IP')
+        SSH_KEY = credentials('SSH_KEY')
+        
+        // 기타 환경 변수
+        PYTHON_VERSION = '3.9'        
+        MONGO_URI = credentials('MONGO_URI')
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                echo 'Cloning the repository...'
+                git branch: 'backend',
+                    url: 'https://lab.ssafy.com/s12-webmobile4-sub1/S12P11D208.git',
+                    credentialsId: 'GitLab-PAT'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                echo 'Building the Docker image...'
+                dir('ai/news-embedding-update-job') {
+                    sh 'docker build -t ${DOCKER_IMAGE}:latest .'
+                }
+            }
+        }
+
+        stage('Save and Transfer Docker Image') {
+            steps {
+                echo 'Saving and transferring Docker image to EC2...'
+                sh "docker save ${DOCKER_IMAGE}:latest | gzip > news_embedding_update.tar.gz"
+                sshPublisher(publishers: [
+                    sshPublisherDesc(
+                        configName: 'EC2-Server',
+                        transfers: [
+                            sshTransfer(
+                                sourceFiles: 'news_embedding_update.tar.gz'
+                            )
+                        ]
+                    )
+                ])
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                echo 'Deploying news embedding update scheduler to EC2...'
+                sshPublisher(publishers: [
+                    sshPublisherDesc(
+                        configName: 'EC2-Server',
+                        transfers: [
+                            sshTransfer(
+                                execCommand: """
+                                    mkdir -p ${DOCKER_PATH}
+                                    docker stop ${DOCKER_CONTAINER} || true
+                                    docker rm ${DOCKER_CONTAINER} || true
+                                    docker rmi ${DOCKER_IMAGE}:latest || true
+                                    docker load < ${DOCKER_PATH}/news_embedding_update.tar.gz
+                                    docker run -d --name ${DOCKER_CONTAINER} \
+                                      -e MONGO_URI=${MONGO_URI} \
+                                      ${DOCKER_IMAGE}:latest
+                                """.stripIndent()
+                            )
+                        ]
+                    )
+                ])
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Cleaning workspace...'
+            cleanWs()
+        }
+        success {
+            echo '✅ Deployment successful!'
+        }
+        failure {
+            echo '❌ Deployment failed.'
+        }
+    }
+}

@@ -9,7 +9,7 @@ from chromadb.config import Settings
 import numpy as np
 
 # MongoDB 연결 정보
-MONGO_URI = "mongodb://d208:rnal2qksghkdlxld!@i12d208.p.ssafy.io:27017/goose?authSource=goose"
+MONGO_URI = os.environ.get("MONGO_URI", "")
 DATABASE_NAME = "goose"
 COLLECTION_NAME = "reference_news"
 
@@ -27,16 +27,8 @@ db = mongo_client[DATABASE_NAME]
 reference_news_collection = db[COLLECTION_NAME]
 
 # ChromaDB 클라이언트 생성 및 컬렉션 가져오기
-# chroma_client = chromadb.Client(host_endpoint=CHROMA_HOST)
 chroma_client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
 chroma_collection = chroma_client.get_or_create_collection(name=CHROMA_COLLECTION_NAME)
-# chroma_settings = Settings(
-#     chroma_api_impl="chromadb_http",
-#     chroma_server_host=CHROMA_HOST,
-#     chroma_server_http_port=CHROMA_PORT
-# )
-# chroma_client = chromadb.Client(chroma_settings)
-# chroma_collection = chroma_client.get_or_create_collection(name=CHROMA_COLLECTION_NAME)
 
 
 def update_chroma_embeddings():
@@ -79,8 +71,8 @@ if __name__ == "__main__":
     print("임베딩 업데이트 스케줄러 시작...")
     # 실행 즉시 한 번 작업 수행
     job()
-    # 이후 6시간마다 실행
-    schedule.every(6).hours.do(job)
+    # 이후 24시간마다 실행
+    schedule.every(24).hours.do(job)
     while True:
         schedule.run_pending()
         time.sleep(60)  # 1분마다 스케줄 체크

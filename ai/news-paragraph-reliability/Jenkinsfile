@@ -67,11 +67,7 @@ pipeline {
                                     docker rm ${DOCKER_CONTAINER} || true
                                     docker rmi ${DOCKER_IMAGE}:latest || true
                                     docker load < ${DOCKER_PATH}/news_paragraph_reliability.tar.gz
-                                    docker run -d \
-                                      --name ${DOCKER_CONTAINER} \
-                                      -p ${DOCKER_PORT}:${DOCKER_PORT} \
-                                      -e OPENAI_API_KEY=${OPENAI_API_KEY} \                                      
-                                      ${DOCKER_IMAGE}:latest
+                                    docker run -d --name ${DOCKER_CONTAINER} -p ${DOCKER_PORT}:${DOCKER_PORT} -e OPENAI_API_KEY=${OPENAI_API_KEY} ${DOCKER_IMAGE}:latest
                                 """.stripIndent()
                             )
                         ]

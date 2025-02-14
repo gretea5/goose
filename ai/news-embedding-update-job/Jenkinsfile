@@ -68,9 +68,7 @@ pipeline {
                                     docker rm ${DOCKER_CONTAINER} || true
                                     docker rmi ${DOCKER_IMAGE}:latest || true
                                     docker load < ${DOCKER_PATH}/news_embedding_update.tar.gz
-                                    docker run -d --name ${DOCKER_CONTAINER} \
-                                      -e MONGO_URI=${MONGO_URI} \
-                                      ${DOCKER_IMAGE}:latest
+                                    docker run -d --name ${DOCKER_CONTAINER} -e MONGO_URI=${MONGO_URI} ${DOCKER_IMAGE}:latest
                                 """.stripIndent()
                             )
                         ]

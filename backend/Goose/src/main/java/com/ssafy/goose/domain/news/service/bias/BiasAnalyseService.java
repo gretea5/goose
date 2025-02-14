@@ -39,19 +39,19 @@ public class BiasAnalyseService {
         System.out.println("analyzeBias 수행, title : " + title);
         // 1. 내용에서 주요 키워드 3개 추출
 //      List<String> keywords = keywordExtractorService.extractTopKeywords(title, 3);
-        KeywordResponseDto keywordResponse = keywordService.extractKeywords(content);
-        String[] keywords = keywordResponse.getKeywords();
-
-        if (keywords == null || keywords.length < 3) {
-            System.out.println("❌ 추출된 키워드가 부족합니다. 기본 점수를 반환합니다.");
-            return BiasAnalysisResult.builder()
-                    .biasScore(50.0)
-                    .reliability(50.0)
-                    .paragraphReliabilities(null)
-                    .paragraphReasons(null)
-                    .build();
-        }
-        System.out.println("🔹 추출된 키워드: " + keywords[0] + ", " + keywords[1] + ", " + keywords[2]);
+//        KeywordResponseDto keywordResponse = keywordService.extractKeywords(content);
+//        String[] keywords = keywordResponse.getKeywords();
+//
+//        if (keywords == null || keywords.length < 3) {
+//            System.out.println("❌ 추출된 키워드가 부족합니다. 기본 점수를 반환합니다.");
+//            return BiasAnalysisResult.builder()
+//                    .biasScore(50.0)
+//                    .reliability(50.0)
+//                    .paragraphReliabilities(null)
+//                    .paragraphReasons(null)
+//                    .build();
+//        }
+//        System.out.println("🔹 추출된 키워드: " + keywords[0] + ", " + keywords[1] + ", " + keywords[2]);
 
 
         // 2. 3일 이내 키워드 기반 레퍼런스 뉴스 검색
@@ -90,7 +90,7 @@ public class BiasAnalyseService {
 //        double bias_content = analyseByContent.checkContentWithReference(content, referenceContents);
 
         // 6. 문단 신뢰성 분석 요청 (FastAPI 호출)
-        ParagraphAnalysisResult analysisResult = analyzeParagraph.analyze(title, keywords, paragraphs);
+        ParagraphAnalysisResult analysisResult = analyzeParagraph.analyze(title, paragraphs);
         double paragraph_reliability = analysisResult.getAverageReliability();
 
 //        double finalScore = (bias_title + bias_content + paragraph_reliability) / 3;

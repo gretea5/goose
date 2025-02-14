@@ -28,27 +28,39 @@ public class SearchService {
 
         List<NewsResponseDto> allResults = new ArrayList<>();
 
-        for (String keyword : keywords) {
-            System.out.println("keyword : " + keyword);
-            List<News> newsList = contentNewsRepository.searchByTitleOrDescriptionOrContent(keyword);
+//        for (String keyword : keywords) {
+//            System.out.println("keyword : " + keyword);
+//            List<News> newsList = contentNewsRepository.searchByTitleOrDescriptionOrContent(keyword);
+//
+//            if (!newsList.isEmpty()) {
+//                // ✅ newsAgency 보완 후 추가
+//                allResults.addAll(convertNewsToNewsResponse(newsList));
+//            } else {
+//                List<NewsResponseDto> naverResults = internetSearchService.search(keyword);
+//
+//                // ✅ 네이버 API에서 가져온 뉴스에도 newsAgency 크롤링 실행
+//                for (NewsResponseDto news : naverResults) {
+//                    if (news.getNewsAgency() == null || news.getNewsAgency().equals("Unknown")) {
+//                        String extractedAgency = internetSearchService.extractNewsAgency(news.getOriginalLink());
+//                        news.setNewsAgency(extractedAgency);
+//                    }
+//                }
+//
+//                allResults.addAll(naverResults);
+//            }
+//        }
 
-            if (!newsList.isEmpty()) {
-                // ✅ newsAgency 보완 후 추가
-                allResults.addAll(convertNewsToNewsResponse(newsList));
-            } else {
-                List<NewsResponseDto> naverResults = internetSearchService.search(keyword);
+        List<NewsResponseDto> naverResults = internetSearchService.search(keywords);
 
-                // ✅ 네이버 API에서 가져온 뉴스에도 newsAgency 크롤링 실행
-                for (NewsResponseDto news : naverResults) {
-                    if (news.getNewsAgency() == null || news.getNewsAgency().equals("Unknown")) {
-                        String extractedAgency = internetSearchService.extractNewsAgency(news.getOriginalLink());
-                        news.setNewsAgency(extractedAgency);
-                    }
-                }
-
-                allResults.addAll(naverResults);
+        // ✅ 네이버 API에서 가져온 뉴스에도 newsAgency 크롤링 실행
+        for (NewsResponseDto news : naverResults) {
+            if (news.getNewsAgency() == null || news.getNewsAgency().equals("Unknown")) {
+                String extractedAgency = internetSearchService.extractNewsAgency(news.getOriginalLink());
+                news.setNewsAgency(extractedAgency);
             }
         }
+
+        allResults.addAll(naverResults);
 
         return allResults;
     }

@@ -33,8 +33,7 @@ TITLE_SIMILARITY_THRESHOLD = 0.6
 # Pydantic 모델 정의
 class NewsArticle(BaseModel):
     title: str  # 제목 추가
-    paragraphs: List[str]
-    keywords: List[str]
+    paragraphs: List[str]    
 
 class NewsReliabilityRequest(BaseModel):
     news: NewsArticle
@@ -67,11 +66,10 @@ def query_similar_paragraph(query_text: str, n_results: int = 1):
         return best_doc, similarity_score
     return None, 0.0
 
-def summarize_with_chatgpt(text: str, keywords: List[str]) -> str:
+def summarize_with_chatgpt(text: str) -> str:
     """
     ChatGPT API를 호출하여, 입력 텍스트를 주요 키워드를 반영한 한 문장으로 간결하게 요약.
-    """
-    # prompt = f"다음 텍스트를 주요 키워드 {', '.join(keywords)}를 반영하여 한 문장으로 간결하게 요약해줘: {text}"
+    """    
     prompt = f"다음 텍스트를 한 문장으로 간결하게 요약해줘: {text}"
     try:
         response = openai.ChatCompletion.create(
@@ -92,8 +90,7 @@ def summarize_with_chatgpt(text: str, keywords: List[str]) -> str:
 
 @app.post("/news/reliability")
 async def analyze_news_reliability(request: NewsReliabilityRequest):
-    title = request.news.title  # 제목 가져오기
-    keywords = request.news.keywords
+    title = request.news.title  # 제목 가져오기    
     news_paragraphs = request.news.paragraphs
 
     if not news_paragraphs:
@@ -117,7 +114,7 @@ async def analyze_news_reliability(request: NewsReliabilityRequest):
 
         similar_doc, similarity = query_similar_paragraph(paragraph)
         if similar_doc:
-            summarized = summarize_with_chatgpt(similar_doc, keywords)
+            summarized = summarize_with_chatgpt(similar_doc)
         else:
             summarized = ""
 

@@ -54,19 +54,35 @@ public class NewsSearchService implements InternetSearchService {
     }
 
     @Override
-    public List<NewsResponseDto> search(String keyword) {
+    public List<NewsResponseDto> search(String[] keywords) {
         // 1️⃣ 입력받은 키워드 처리 (쉼표, 공백으로 구분하여 배열 처리)
-        String[] keywords = keyword.split("\\s*,\\s*|\\s+");
+//        String[] keywords = keyword.split("\\s*,\\s*|\\s+");
 
         // 2️⃣ MongoDB 검색
         Query query = new Query();
-        Criteria criteria = new Criteria();
-        Criteria[] keywordCriterias = new Criteria[keywords.length];
-        for (int i = 0; i < keywords.length; i++) {
-            keywordCriterias[i] = Criteria.where("content").regex(".*" + keywords[i] + ".*", "i");
+//        Criteria criteria = new Criteria();
+//        Criteria[] keywordCriterias = new Criteria[keywords.length];
+//        for (int i = 0; i < keywords.length; i++) {
+//            keywordCriterias[i] = Criteria.where("content").regex(".*" + keywords[i] + ".*", "i");
+//        }
+//        criteria.andOperator(keywordCriterias);
+//        query.addCriteria(criteria);
+        // ✅ OR 조건을 사용하여 title, description, content 중 하나라도 포함된 뉴스 검색
+        List<Criteria> keywordCriteriaList = new ArrayList<>();
+        for (String keyword : keywords) {
+            keywordCriteriaList.add(new Criteria().orOperator(
+                    Criteria.where("title").regex(".*" + keyword + ".*", "i"),
+                    Criteria.where("description").regex(".*" + keyword + ".*", "i"),
+                    Criteria.where("content").regex(".*" + keyword + ".*", "i")
+            ));
         }
-        criteria.andOperator(keywordCriterias);
-        query.addCriteria(criteria);
+
+        if (!keywordCriteriaList.isEmpty()) {
+            query.addCriteria(new Criteria().orOperator(keywordCriteriaList.toArray(new Criteria[0])));
+        }
+
+        // ✅ 검색 결과 최대 5개 제한
+        query.limit(5);
 
         List<NewsResponseDto> mongoData = mongoTemplate.find(query, NewsResponseDto.class, "news_articles");
 
@@ -77,7 +93,7 @@ public class NewsSearchService implements InternetSearchService {
         // 3️⃣ MongoDB 데이터 부족 시 Naver API 호출
         List<NewsResponseDto> resultData = new ArrayList<>(mongoData);
         if (mongoDataSize < 5) {
-            List<NewsResponseDto> naverData = fetchNaverNews(keyword);
+            List<NewsResponseDto> naverData = fetchNaverNews(keywords);
             resultData.addAll(naverData.subList(0, Math.min(neededFromNaver, naverData.size())));
         }
 
@@ -104,7 +120,7 @@ public class NewsSearchService implements InternetSearchService {
         return resultData;
     }
 
-    private List<NewsResponseDto> fetchNaverNews(String keyword) {
+    private List<NewsResponseDto> fetchNaverNews(String[] keywords) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Naver-Client-Id", clientId);
@@ -112,7 +128,7 @@ public class NewsSearchService implements InternetSearchService {
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(
-                NAVER_NEWS_URL + keyword + "&display=55",
+                NAVER_NEWS_URL + keywords[0] + " " + keywords[1] + " " + keywords[2] + " " + "&display=20",
                 HttpMethod.GET,
                 entity,
                 String.class

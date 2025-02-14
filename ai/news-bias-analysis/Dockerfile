@@ -17,4 +17,4 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # FastAPI 애플리케이션 실행 (uvicorn) - 포트 5061
-CMD ["uvicorn", "news_paragraph_reliability:app", "--host", "0.0.0.0", "--port", "5061"]
+CMD ["uvicorn", "news_bias_analysis:app", "--host", "0.0.0.0", "--port", "5062"]

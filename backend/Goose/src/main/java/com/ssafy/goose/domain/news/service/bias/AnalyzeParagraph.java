@@ -17,27 +17,24 @@ import java.util.stream.Collectors;
 public class AnalyzeParagraph {
 
     // ✅ FastAPI 서버 URL (EC2 배포 시 주소 변경 필요)
-    private static final String FASTAPI_URL = "http://i12d208.p.ssafy.io:5059/news/reliability";
+//    private static final String FASTAPI_URL = "http://i12d208.p.ssafy.io:5059/news/reliability";
+    private static final String FASTAPI_URL = "http://http://i12d208.p.ssafy.io/:5061/news/reliability";
     private final RestTemplate restTemplate;
 
     public AnalyzeParagraph() {
         this.restTemplate = new RestTemplate();
     }
 
-    public ParagraphAnalysisResult analyze(String[] keywords, List<String> paragraphs, List<ReferenceNewsArticle> remainingArticles) {
+    public ParagraphAnalysisResult analyze(String title, List<String> paragraphs) {
         // ✅ FastAPI 요청 데이터 생성
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("news", Map.of(
-                "paragraphs", paragraphs,
-                "keywords", keywords
+                "title", title,
+                "paragraphs", paragraphs
         ));
-        requestBody.put("references", remainingArticles.stream().map(article -> Map.of(
-                "paragraphs", article.getParagraphs(),
-                "keywords", keywords
-        )).collect(Collectors.toList()));
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
@@ -49,18 +46,18 @@ public class AnalyzeParagraph {
                 List<String> bestMatches = (List<String>) response.getBody().get("best_evidence_paragraphs");
 
                 // ✅ best_matches를 콘솔에 출력
-                System.out.println("✅ FastAPI 신뢰성 분석 결과:");
-                for (int i = 0; i < bestMatches.size(); i++) {
-                    System.out.println("🔹 문단 " + (i + 1) + " 신뢰성 점수: " + reliabilityScores.get(i));
-                    System.out.println();
-                    System.out.println("🔹 기존 문단 : ");
-                    System.out.println(paragraphs.get(i));
-                    System.out.println();
-                    System.out.printf("🔹%.2f%% 확률로 올바른 내용\n", reliabilityScores.get(i) * 100);
-                    System.out.println("   ➜ " + bestMatches.get(i));
-                    System.out.println();
-                    System.out.println();
-                }
+//                System.out.println("✅ FastAPI 신뢰성 분석 결과:");
+//                for (int i = 0; i < bestMatches.size(); i++) {
+//                    System.out.println("🔹 문단 " + (i + 1) + " 신뢰성 점수: " + reliabilityScores.get(i));
+//                    System.out.println();
+//                    System.out.println("🔹 기존 문단 : ");
+//                    System.out.println(paragraphs.get(i));
+//                    System.out.println();
+//                    System.out.printf("🔹%.2f%% 확률로 올바른 내용\n", reliabilityScores.get(i) * 100);
+//                    System.out.println("   ➜ " + bestMatches.get(i));
+//                    System.out.println();
+//                    System.out.println();
+//                }
 
                 return new ParagraphAnalysisResult(reliabilityScores, bestMatches);
             }

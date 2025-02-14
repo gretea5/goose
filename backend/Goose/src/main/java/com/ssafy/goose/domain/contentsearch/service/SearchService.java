@@ -24,31 +24,20 @@ public class SearchService {
     }
 
     public List<NewsResponseDto> searchNewsByKeyword(String[] keywords) {
+        System.out.println("searchNewsByKeyword 수행 시작");
 
-        List<NewsResponseDto> allResults = new ArrayList<>();
+        // 뉴스기사 5개 찾기 : 1) 몽고DB에서, 2) 네이버 검색으로
+        List<NewsResponseDto> newsResults = internetSearchService.search(keywords);
 
-        for (String keyword : keywords) {
-            List<News> newsList = contentNewsRepository.searchByTitleOrDescriptionOrContent(keyword);
-
-            if (!newsList.isEmpty()) {
-                // ✅ newsAgency 보완 후 추가
-                allResults.addAll(convertNewsToNewsResponse(newsList));
-            } else {
-                List<NewsResponseDto> naverResults = internetSearchService.search(keyword);
-
-                // ✅ 네이버 API에서 가져온 뉴스에도 newsAgency 크롤링 실행
-                for (NewsResponseDto news : naverResults) {
-                    if (news.getNewsAgency() == null || news.getNewsAgency().equals("Unknown")) {
-                        String extractedAgency = internetSearchService.extractNewsAgency(news.getOriginalLink());
-                        news.setNewsAgency(extractedAgency);
-                    }
-                }
-
-                allResults.addAll(naverResults);
+        // ✅ 네이버 API에서 가져온 뉴스에도 newsAgency 크롤링 실행
+        for (NewsResponseDto news : newsResults) {
+            if (news.getNewsAgency() == null || news.getNewsAgency().equals("Unknown")) {
+                String extractedAgency = internetSearchService.extractNewsAgency(news.getOriginalLink());
+                news.setNewsAgency(extractedAgency);
             }
         }
 
-        return allResults;
+        return newsResults;
     }
 
     private List<NewsResponseDto> convertNewsToNewsResponse(List<News> newsList) {

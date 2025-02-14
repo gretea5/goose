@@ -2,14 +2,16 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'factcheck_crawling'
-        DOCKER_CONTAINER = 'factcheck_crawling-container'
-        DOCKER_PORT = '5054'
+        DOCKER_IMAGE = 'news_bias_analysis'
+        DOCKER_CONTAINER = 'news_bias_analysis-container'
+        DOCKER_PORT = '5062'
         DOCKER_PATH = credentials('DOCKER_PATH')
 
         EC2_USER = credentials('EC2_USER')
         EC2_IP = credentials('EC2_IP')
         SSH_KEY = credentials('SSH_KEY')
+
+        OPENAI_API_KEY = credentials('OPENAI_API_KEY')        
 
         PYTHON_VERSION = '3.9'
     }
@@ -27,7 +29,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo 'Building the Docker image...'
-                dir('ai/factcheck-crawling') {
+                dir('ai/news-bias-analysis') {
                     sh 'docker build -t ${DOCKER_IMAGE}:latest .'
                 }
             }
@@ -36,14 +38,14 @@ pipeline {
         stage('Save and Transfer Docker Image') {
             steps {
                 echo 'Saving and transferring Docker image to EC2...'
-                sh "docker save ${DOCKER_IMAGE}:latest | gzip > factcheck_crawling.tar.gz"
+                sh "docker save ${DOCKER_IMAGE}:latest | gzip > news_bias_analysis.tar.gz"
 
                 sshPublisher(publishers: [
                     sshPublisherDesc(
                         configName: 'EC2-Server',
                         transfers: [
                             sshTransfer(
-                                sourceFiles: 'factcheck_crawling.tar.gz',
+                                sourceFiles: 'news_bias_analysis.tar.gz',
                             )
                         ]
                     )
@@ -64,8 +66,12 @@ pipeline {
                                     docker stop ${DOCKER_CONTAINER} || true
                                     docker rm ${DOCKER_CONTAINER} || true
                                     docker rmi ${DOCKER_IMAGE}:latest || true
-                                    docker load < ${DOCKER_PATH}/factcheck_crawling.tar.gz
-                                    docker run -d --name ${DOCKER_CONTAINER} -p ${DOCKER_PORT}:${DOCKER_PORT} ${DOCKER_IMAGE}:latest
+                                    docker load < ${DOCKER_PATH}/news_bias_analysis.tar.gz
+                                    docker run -d \
+                                      --name ${DOCKER_CONTAINER} \
+                                      -p ${DOCKER_PORT}:${DOCKER_PORT} \
+                                      -e OPENAI_API_KEY=${OPENAI_API_KEY} \                                      
+                                      ${DOCKER_IMAGE}:latest
                                 """.stripIndent()
                             )
                         ]
@@ -81,10 +87,10 @@ pipeline {
             cleanWs()
         }
         success {
-            echo '✅ FactCheck Crawling Deployment successful!'
+            echo '✅ FastAPI Deployment successful!'
         }
         failure {
-            echo '❌ FactCheck Crawling Deployment failed.'
+            echo '❌ FastAPI Deployment failed.'
         }
     }
 }

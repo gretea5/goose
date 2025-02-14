@@ -25,6 +25,7 @@ public class ContentService {
         // 키워드 추출
         KeywordResponseDto keywordResponse = keywordService.extractKeywords(text);
         String[] keywords = keywordResponse.getKeywords();
+        System.out.println("키워드 : " + keywords[0] + " " + keywords[1] + " " + keywords[2]);
 
         // 키워드 기반 뉴스 검색
         List<NewsResponseDto> results = searchService.searchNewsByKeyword(keywords);

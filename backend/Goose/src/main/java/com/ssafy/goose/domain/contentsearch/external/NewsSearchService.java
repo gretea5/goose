@@ -3,6 +3,8 @@ package com.ssafy.goose.domain.contentsearch.external;
 import com.ssafy.goose.domain.contentsearch.dto.NewsResponseDto;
 import com.ssafy.goose.domain.news.service.bias.BiasAnalysisResult;
 import com.ssafy.goose.domain.news.service.bias.BiasAnalyseService;
+import com.ssafy.goose.domain.news.service.crawling.NewsContentScraping;
+import com.ssafy.goose.domain.news.service.paragraph.NewsParagraphSplitService;
 import jakarta.annotation.PostConstruct;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -29,6 +31,7 @@ import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class NewsSearchService implements InternetSearchService {
@@ -47,6 +50,12 @@ public class NewsSearchService implements InternetSearchService {
     @Autowired
     private BiasAnalyseService biasAnalyseService;
 
+    @Autowired
+    private NewsContentScraping newsContentScraping;
+
+    @Autowired
+    private NewsParagraphSplitService newsParagraphSplitService;
+
     // ✅ SSL 인증 우회 설정 추가 (애플리케이션 시작 시 자동 실행)
     @PostConstruct
     public void init() {
@@ -60,31 +69,27 @@ public class NewsSearchService implements InternetSearchService {
 
         // 2️⃣ MongoDB 검색
         Query query = new Query();
-//        Criteria criteria = new Criteria();
-//        Criteria[] keywordCriterias = new Criteria[keywords.length];
-//        for (int i = 0; i < keywords.length; i++) {
-//            keywordCriterias[i] = Criteria.where("content").regex(".*" + keywords[i] + ".*", "i");
-//        }
-//        criteria.andOperator(keywordCriterias);
-//        query.addCriteria(criteria);
-        // ✅ OR 조건을 사용하여 title, description, content 중 하나라도 포함된 뉴스 검색
-        List<Criteria> keywordCriteriaList = new ArrayList<>();
+        List<Criteria> criteriaList = new ArrayList<>();
         for (String keyword : keywords) {
-            keywordCriteriaList.add(new Criteria().orOperator(
+            // 각 키워드가 title, description, content 중 하나에라도 포함되어 있는 조건
+            Criteria keywordCriteria = new Criteria().orOperator(
                     Criteria.where("title").regex(".*" + keyword + ".*", "i"),
                     Criteria.where("description").regex(".*" + keyword + ".*", "i"),
                     Criteria.where("content").regex(".*" + keyword + ".*", "i")
-            ));
+            );
+            criteriaList.add(keywordCriteria);
         }
 
-        if (!keywordCriteriaList.isEmpty()) {
-            query.addCriteria(new Criteria().orOperator(keywordCriteriaList.toArray(new Criteria[0])));
+// 모든 키워드 조건을 AND로 결합 (각 키워드가 모두 등장해야 함)
+        if (!criteriaList.isEmpty()) {
+            query.addCriteria(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])));
         }
 
-        // ✅ 검색 결과 최대 5개 제한
+// 검색 결과 최대 5개 제한
         query.limit(5);
 
         List<NewsResponseDto> mongoData = mongoTemplate.find(query, NewsResponseDto.class, "news_articles");
+
 
         int mongoDataSize = mongoData.size();
         int neededFromNaver = 5 - mongoDataSize;
@@ -146,21 +151,35 @@ public class NewsSearchService implements InternetSearchService {
             String naverLink = jsonObject.optString("link", "");
             String pubDate = jsonObject.optString("pubDate", "");
 
-            // 언론사 정보는 필요에 따라 추출하여 사용할 수 있습니다.
+            // 1. 언론사 정보는 필요에 따라 추출하여 사용할 수 있습니다.
             String newsAgency = extractNewsAgency(originalLink.isEmpty() ? naverLink : originalLink);
+
+            // 2. FastAPI를 이용해 뉴스 본문과 대표 이미지 크롤링
+            Map<String, Object> scrapedData = newsContentScraping.extractArticle(naverLink);
+            if (scrapedData == null || !scrapedData.containsKey("text")) continue;
+
+            String cleanTitle = (String) scrapedData.get("title");
+            String content = (String) scrapedData.get("text");
+            String topImage = (String) scrapedData.get("image");
+
+            // 3. 본문이 너무 짧은 경우 제외
+            if (content.length() < 100) continue;
+
+            // 4. 문단 분리 수행 (FastAPI 이용)
+            List<String> paragraphs = newsParagraphSplitService.getSplitParagraphs(content);
 
             NewsResponseDto newsDto = NewsResponseDto.builder()
                     .id(null) // Naver API에서 id 정보가 없다면 null 처리
-                    .title(jsonObject.optString("title", "Unknown"))
+                    .title(cleanTitle)
                     .originalLink(originalLink)
                     .naverLink(naverLink)
                     .description(jsonObject.optString("description", ""))
                     .pubDate(pubDate)
-                    .content("") // Naver API에서 본문 내용은 제공되지 않으므로 빈 문자열
-                    .paragraphs(new ArrayList<>())             // 문단 정보는 따로 제공되지 않으므로 빈 리스트
+                    .content(content)
+                    .paragraphs(paragraphs)
                     .paragraphReliabilities(new ArrayList<>())   // 빈 리스트
                     .paragraphReasons(new ArrayList<>())         // 빈 리스트
-                    .topImage("")                                // 대표 이미지 URL이 없다면 빈 문자열
+                    .topImage(topImage)
                     .extractedAt(LocalDateTime.now())            // 현재 시간을 추출 시간으로 사용
                     .biasScore(0.0)                              // 기본 편향성 점수
                     .reliability(50.0)                           // 기본 신뢰도 점수 (예: 50.0)
@@ -254,10 +273,16 @@ public class NewsSearchService implements InternetSearchService {
     private static void trustAllCertificates() {
         try {
             SSLContext sc = SSLContext.getInstance("TLS");
-            sc.init(null, new TrustManager[]{ new X509TrustManager() {
-                public X509Certificate[] getAcceptedIssuers() { return null; }
-                public void checkClientTrusted(X509Certificate[] certs, String authType) { }
-                public void checkServerTrusted(X509Certificate[] certs, String authType) { }
+            sc.init(null, new TrustManager[]{new X509TrustManager() {
+                public X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+
+                public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                }
+
+                public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                }
             }}, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);

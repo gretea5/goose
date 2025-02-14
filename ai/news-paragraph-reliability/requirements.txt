@@ -9,3 +9,4 @@ torch  # 🚀 sentence-transformers에서 모델 로드 시 필요
 openai==0.27.0
 chromadb==0.3.21
 chromadb-client
+

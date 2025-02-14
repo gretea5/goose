@@ -111,7 +111,8 @@ public class NewsSearchService implements InternetSearchService {
         System.out.println("MongoDB, 네이버 검색으로 가져온 뉴스들 신뢰도 점수 부여 시작, resultData 수 : " + resultData.size());
         for (NewsResponseDto dto : resultData) {
             // dto.getParagraphs()가 List<String> 타입이라고 가정
-            BiasAnalysisResult analysisResult = biasAnalyseService.analyzeBias(
+            BiasAnalysisResult analysisResult = biasAnalyseService.analyzeBiasExternalNews(
+                    dto.getId(),
                     dto.getTitle(),
                     dto.getContent(),
                     dto.getParagraphs()

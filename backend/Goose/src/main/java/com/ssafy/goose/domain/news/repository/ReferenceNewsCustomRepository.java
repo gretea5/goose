@@ -1,5 +1,7 @@
 package com.ssafy.goose.domain.news.repository;
 
+import com.ssafy.goose.domain.contentsearch.dto.KeywordResponseDto;
+import com.ssafy.goose.domain.contentsearch.service.KeywordService;
 import com.ssafy.goose.domain.news.entity.ReferenceNewsArticle;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -14,12 +16,19 @@ import java.util.List;
 public class ReferenceNewsCustomRepository {
 
     private final MongoTemplate mongoTemplate;
+    private final KeywordService keywordService;
 
-    public ReferenceNewsCustomRepository(MongoTemplate mongoTemplate) {
+    public ReferenceNewsCustomRepository(MongoTemplate mongoTemplate, KeywordService keywordService) {
         this.mongoTemplate = mongoTemplate;
+        this.keywordService = keywordService;
     }
 
-    public List<ReferenceNewsArticle> findNewsByKeywords(String[] keywords, LocalDateTime since) {
+    public List<ReferenceNewsArticle> findNewsByKeywords(String title, String content) {
+        // 키워드 추출
+        KeywordResponseDto keywordResponse = keywordService.extractKeywords(content);
+        String[] keywords = keywordResponse.getKeywords();
+        System.out.println("키워드 : " + keywords[0] + " " + keywords[1] + " " + keywords[2]);
+
         Query query = new Query();
 
         // ✅ 3일 이내의 뉴스만 검색

@@ -57,7 +57,7 @@ public class NewsAutoProcessingService {
             System.out.println("문단 분리 수행 완료, 문단 갯수 : " + paragraphs.size());
 
             // 5. 편향성 분석 수행 (문단별 신뢰도/분석 사유 포함)
-            BiasAnalysisResult analysisResult = biasAnalyseService.analyzeBias(cleanTitle, content, paragraphs);
+            BiasAnalysisResult analysisResult = biasAnalyseService.analyzeBiasMyNews(cleanTitle, content, paragraphs);
 
             // 6. MongoDB 저장 객체 생성 (분석 결과 반영)
             NewsArticle article = NewsArticle.builder()

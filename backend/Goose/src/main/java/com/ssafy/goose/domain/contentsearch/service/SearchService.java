@@ -24,10 +24,12 @@ public class SearchService {
     }
 
     public List<NewsResponseDto> searchNewsByKeyword(String[] keywords) {
+        System.out.println("searchNewsByKeyword 수행 시작");
 
         List<NewsResponseDto> allResults = new ArrayList<>();
 
         for (String keyword : keywords) {
+            System.out.println("keyword : " + keyword);
             List<News> newsList = contentNewsRepository.searchByTitleOrDescriptionOrContent(keyword);
 
             if (!newsList.isEmpty()) {

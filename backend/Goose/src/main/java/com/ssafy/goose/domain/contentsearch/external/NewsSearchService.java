@@ -72,6 +72,7 @@ public class NewsSearchService implements InternetSearchService {
 
         int mongoDataSize = mongoData.size();
         int neededFromNaver = 5 - mongoDataSize;
+        System.out.println("MongoDB 데이터 추출 갯수 : " + mongoDataSize);
 
         // 3️⃣ MongoDB 데이터 부족 시 Naver API 호출
         List<NewsResponseDto> resultData = new ArrayList<>(mongoData);
@@ -86,6 +87,7 @@ public class NewsSearchService implements InternetSearchService {
 
         // 4️⃣ 각 결과마다 분석 수행하여 DTO 업데이트
         // (예: 제목, 본문, 문단 리스트를 사용하여 편향/신뢰도 분석 후 결과를 set)
+        System.out.println("MongoDB, 네이버 검색으로 가져온 뉴스들 신뢰도 점수 부여 시작, resultData 수 : " + resultData.size());
         for (NewsResponseDto dto : resultData) {
             // dto.getParagraphs()가 List<String> 타입이라고 가정
             BiasAnalysisResult analysisResult = biasAnalyseService.analyzeBias(

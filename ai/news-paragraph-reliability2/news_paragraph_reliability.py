@@ -6,11 +6,10 @@ import openai
 import chromadb
 from sentence_transformers import SentenceTransformer
 import numpy as np
-import concurrent.futures
 import torch
 
 # OpenAI API Key 설정 (실제 키로 교체)
-openai.api_key = "YOUR_OPENAI_API_KEY"
+openai.api_key = "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"
 
 app = FastAPI()
 
@@ -20,25 +19,36 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 bert_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # ChromaDB 연결 정보 (뉴스 reference 문단 임베딩이 저장된 컬렉션)
-CHROMA_HOST = "i12d208.p.ssafy.io"   # 도메인만 사용
-CHROMA_PORT = 8000                   # 외부 포트 번호
+CHROMA_HOST = "i12d208.p.ssafy.io"
+CHROMA_PORT = 8000
 CHROMA_COLLECTION_NAME = "reference_paragraphs"
 
 # ChromaDB 클라이언트 생성 및 컬렉션 가져오기
 chroma_client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
 chroma_collection = chroma_client.get_or_create_collection(name=CHROMA_COLLECTION_NAME)
 
-# 컬렉션 내 문서 개수 확인
-doc_count = chroma_collection.count()
-print(f"저장된 문서 개수: {doc_count}")
+# 제목과 문단 간 유사도 비교 임계값 설정 (0.6 이상일 때만 분석 수행)
+TITLE_SIMILARITY_THRESHOLD = 0.6
 
 # Pydantic 모델 정의
 class NewsArticle(BaseModel):
+    title: str  # 제목 추가
     paragraphs: List[str]
     keywords: List[str]
 
 class NewsReliabilityRequest(BaseModel):
     news: NewsArticle
+
+def compute_similarity(text1: str, text2: str) -> float:
+    """
+    두 개의 텍스트를 비교하여 코사인 유사도를 반환
+    """
+    embedding1 = bert_model.encode([text1])[0]
+    embedding2 = bert_model.encode([text2])[0]
+    
+    # 코사인 유사도 계산
+    similarity = np.dot(embedding1, embedding2) / (np.linalg.norm(embedding1) * np.linalg.norm(embedding2))
+    return similarity
 
 def query_similar_paragraph(query_text: str, n_results: int = 1):
     """
@@ -53,8 +63,7 @@ def query_similar_paragraph(query_text: str, n_results: int = 1):
     if result and "documents" in result and result["documents"] and result["documents"][0]:
         best_doc = result["documents"][0][0]
         best_distance = result["distances"][0][0]
-        # 유사도 계산: similarity = 1/(1+distance)
-        similarity_score = 1 / (1 + best_distance)
+        similarity_score = 1 / (1 + best_distance)  # 거리 기반 유사도 계산
         return best_doc, similarity_score
     return None, 0.0
 
@@ -62,15 +71,16 @@ def summarize_with_chatgpt(text: str, keywords: List[str]) -> str:
     """
     ChatGPT API를 호출하여, 입력 텍스트를 주요 키워드를 반영한 한 문장으로 간결하게 요약.
     """
-    prompt = f"다음 텍스트를 주요 키워드 {', '.join(keywords)}를 반영하여 한 문장으로 간결하게 요약해줘: {text}"
+    # prompt = f"다음 텍스트를 주요 키워드 {', '.join(keywords)}를 반영하여 한 문장으로 간결하게 요약해줘: {text}"
+    prompt = f"다음 텍스트를 한 문장으로 간결하게 요약해줘: {text}"
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "너는 뉴스 요약 전문가이다."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=60,
+            max_tokens=120,
             n=1,
             temperature=0.5
         )
@@ -82,6 +92,7 @@ def summarize_with_chatgpt(text: str, keywords: List[str]) -> str:
 
 @app.post("/news/reliability")
 async def analyze_news_reliability(request: NewsReliabilityRequest):
+    title = request.news.title  # 제목 가져오기
     keywords = request.news.keywords
     news_paragraphs = request.news.paragraphs
 
@@ -94,13 +105,22 @@ async def analyze_news_reliability(request: NewsReliabilityRequest):
     best_evidence_paragraphs = []
     reliability_scores = []
 
-    # 각 뉴스 문단마다, ChromaDB에서 가장 유사한 문단 검색 후 ChatGPT로 요약
+    # 제목과 유사한 문단만 분석 수행
     for paragraph in news_paragraphs:
+        title_similarity = compute_similarity(title, paragraph)
+        
+        if title_similarity < TITLE_SIMILARITY_THRESHOLD:
+            # 제목과 유사하지 않으면 신뢰도 분석을 건너뜀
+            best_evidence_paragraphs.append(None)
+            reliability_scores.append(0.0)
+            continue
+
         similar_doc, similarity = query_similar_paragraph(paragraph)
         if similar_doc:
             summarized = summarize_with_chatgpt(similar_doc, keywords)
         else:
             summarized = ""
+
         best_evidence_paragraphs.append(summarized)
         reliability_scores.append(similarity)
 

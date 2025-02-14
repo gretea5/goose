@@ -17,27 +17,25 @@ import java.util.stream.Collectors;
 public class AnalyzeParagraph {
 
     // ✅ FastAPI 서버 URL (EC2 배포 시 주소 변경 필요)
-    private static final String FASTAPI_URL = "http://i12d208.p.ssafy.io:5059/news/reliability";
+//    private static final String FASTAPI_URL = "http://i12d208.p.ssafy.io:5059/news/reliability";
+    private static final String FASTAPI_URL = "http://localhost:5061/news/reliability";
     private final RestTemplate restTemplate;
 
     public AnalyzeParagraph() {
         this.restTemplate = new RestTemplate();
     }
 
-    public ParagraphAnalysisResult analyze(String[] keywords, List<String> paragraphs, List<ReferenceNewsArticle> remainingArticles) {
+    public ParagraphAnalysisResult analyze(String title, String[] keywords, List<String> paragraphs) {
         // ✅ FastAPI 요청 데이터 생성
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("news", Map.of(
+                "title", title,
                 "paragraphs", paragraphs,
                 "keywords", keywords
         ));
-        requestBody.put("references", remainingArticles.stream().map(article -> Map.of(
-                "paragraphs", article.getParagraphs(),
-                "keywords", keywords
-        )).collect(Collectors.toList()));
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 

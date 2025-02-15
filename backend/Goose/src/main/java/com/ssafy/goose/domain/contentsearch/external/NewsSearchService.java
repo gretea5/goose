@@ -85,9 +85,9 @@ public class NewsSearchService implements InternetSearchService {
             criteriaList.add(keywordCriteria);
         }
 
-// 모든 키워드 조건을 AND로 결합 (각 키워드가 모두 등장해야 함)
+// 모든 키워드 조건을 AND로 결합 (각 키워드가 모두 등장해야 함) -> 현재 or 결합으로 임시 변경
         if (!criteriaList.isEmpty()) {
-            query.addCriteria(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])));
+            query.addCriteria(new Criteria().orOperator(criteriaList.toArray(new Criteria[0])));
         }
 
 // 검색 결과 최대 5개 제한

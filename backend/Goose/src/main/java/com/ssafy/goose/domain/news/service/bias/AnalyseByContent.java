@@ -13,25 +13,33 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 public class AnalyseByContent {
     private final RestTemplate restTemplate = new RestTemplate();
-//    private static final String CONTENT_COMPARE_CONTENTS_API_URL = "http://i12d208.p.ssafy.io:5062/content-compare-contents";
+    // private static final String CONTENT_COMPARE_CONTENTS_API_URL = "http://i12d208.p.ssafy.io:5062/paragraph-compare-contents";
     private static final String CONTENT_COMPARE_CONTENTS_API_URL = "http://localhost:5062/paragraph-compare-contents";
 
     public double checkContentWithReference(String newsId, List<ReferenceNewsArticle> referenceNewsList) {
         try {
             int totalArticles = referenceNewsList.size();
-            if (totalArticles == 0) return 0.0; // 데이터가 없으면 0 반환
+            if (totalArticles == 0) return 0.0;
 
             double totalScore = 0.0;
 
             for (ReferenceNewsArticle referenceNews : referenceNewsList) {
+                // ✅ 문단 개수만큼 인덱스 동적 생성
+                List<Integer> paragraphIndices = IntStream.range(0, referenceNews.getParagraphs().size())
+                        .boxed()
+                        .collect(Collectors.toList());
+
                 // ✅ 요청 데이터 생성
-                Map<String, String> requestBody = new HashMap<>();
+                Map<String, Object> requestBody = new HashMap<>();
                 requestBody.put("newsId", newsId);
                 requestBody.put("referenceNewsId", referenceNews.getId());
+                requestBody.put("paragraphIndices", paragraphIndices);
 
                 // ✅ HTTP 요청 설정
                 HttpHeaders headers = new HttpHeaders();
@@ -46,22 +54,23 @@ public class AnalyseByContent {
 
                 List<Map<String, Object>> similarities = (List<Map<String, Object>>) responseBody.get("similarities");
 
+                // ✅ 최대 유사도 점수 계산
                 double maxSimilarityScore = similarities.stream()
                         .mapToDouble(s -> ((Number) s.get("similarity")).doubleValue())
                         .max()
                         .orElse(0.0);
 
-                System.out.println("[내용분석] similarity_score : " + maxSimilarityScore);
+                System.out.println("[내용분석] max similarity_score : " + maxSimilarityScore);
 
                 // ✅ 점수 합산
                 totalScore += maxSimilarityScore;
             }
 
-            // ✅ 평균 점수 계산 (0.0 ~ 1.0 범위)
+            // ✅ 평균 점수 계산 (0.0 ~ 1.0 -> 0.0 ~ 100.0 변환)
             double averageScore = totalScore * 100 / totalArticles;
-            System.out.println("Content 사용, 평균 Bias  (0.0 ~ 100.0 범위) : " + averageScore);
+            System.out.println("Content 사용, 평균 Bias (0.0 ~ 100.0 범위): " + averageScore);
 
-            return averageScore; // 최종 평균 유사도 반환
+            return averageScore;
 
         } catch (Exception e) {
             e.printStackTrace();

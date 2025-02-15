@@ -1,5 +1,6 @@
 package com.ssafy.goose.security;
 
+import io.jsonwebtoken.JwtException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,13 +28,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String token = resolveToken(request);
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            String nickname = jwtTokenProvider.getUsername(token);
-            Authentication auth = new UsernamePasswordAuthenticationToken(
-                    nickname, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
-            );
-            SecurityContextHolder.getContext().setAuthentication(auth);
+        try {
+            if (token != null && jwtTokenProvider.validateToken(token)) {
+                String nickname = jwtTokenProvider.getUsername(token);
+                Authentication auth = new UsernamePasswordAuthenticationToken(
+                        nickname, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                );
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
+        } catch (JwtException e) {
+            // 토큰이 만료되었거나 검증 실패한 경우 401 반환
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Unauthorized: " + e.getMessage());
+            return;
         }
+
         filterChain.doFilter(request, response);
     }
 

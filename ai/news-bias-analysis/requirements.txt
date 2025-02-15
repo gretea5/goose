@@ -1,23 +1,12 @@
-# fastapi==0.110.0
-# uvicorn==0.29.0
-# sentence-transformers==2.2.2
-# numpy==1.26.2
-# scikit-learn==1.4.1.post1
-# pydantic==2.6.1  # FastAPI 최신 버전과 호환되는 pydantic 버전
-# huggingface_hub==0.16.4  # 🚀 'cached_download' 관련 ImportError 방지
-# torch  # 🚀 sentence-transformers에서 모델 로드 시 필요
-# openai==0.27.0
-# chromadb==0.3.21
-# chromadb-client
-
+torch
+openai==0.27.0
+chromadb==0.6.3
 fastapi==0.110.0
 uvicorn==0.29.0
 sentence-transformers==2.2.2
 numpy==1.26.2
 scikit-learn==1.4.1.post1
-# pydantic 버전 문제 발생 시 chromadb와 호환되도록 pydantic을 다운그레이드하거나, 최신 chromadb를 사용하세요.
-pydantic==1.10.7
-huggingface_hub==0.16.4
-torch
-openai==0.27.0
-chromadb==0.3.21
+pydantic==2.7.1  # 최신 v2 사용
+pydantic-settings==2.1.0  # 안정적으로 사용되는 버전
+huggingface_hub==0.14.1
+PyYAML>=6.0.1

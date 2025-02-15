@@ -15,8 +15,10 @@ public class EmbeddingStorageService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private final String STORE_NEWS_URL = "http://localhost:5063/store-news";
-    private final String STORE_REFERENCE_NEWS_URL = "http://localhost:5063/store-reference-news";
+    private final String STORE_NEWS_URL = "http://i12d208.p.ssafy.io:5063/store-news";
+    private final String STORE_REFERENCE_NEWS_URL = "http://i12d208.p.ssafy.io:5063/store-reference-news";
+//    private final String STORE_NEWS_URL = "http://localhost:5063/store-news";
+//    private final String STORE_REFERENCE_NEWS_URL = "http://localhost:5063/store-reference-news";
 
     public void storeNews(EmbeddingRequest request) {
         sendPostRequest(STORE_NEWS_URL, request.toMap());

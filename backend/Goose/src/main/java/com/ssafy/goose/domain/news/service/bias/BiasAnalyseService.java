@@ -4,6 +4,7 @@ import com.ssafy.goose.domain.contentsearch.dto.KeywordResponseDto;
 import com.ssafy.goose.domain.contentsearch.service.KeywordService;
 import com.ssafy.goose.domain.news.entity.ReferenceNewsArticle;
 import com.ssafy.goose.domain.news.repository.ReferenceNewsCustomRepository;
+import com.ssafy.goose.domain.news.service.EmbeddingStorageService;
 import com.ssafy.goose.domain.news.service.keyword.TitleKeywordExtractor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ public class BiasAnalyseService {
     private final TitleKeywordExtractor keywordExtractorService;
     private final KeywordService keywordService;
     private final AnalyzeParagraph analyzeParagraph;
+    private final EmbeddingStorageService embeddingStorageService;
 
     public BiasAnalyseService(
             ReferenceNewsCustomRepository referenceNewsCustomRepository,
@@ -26,13 +28,15 @@ public class BiasAnalyseService {
             AnalyseByContent analyseByContent,
             KeywordService keywordService,
             TitleKeywordExtractor keywordExtractorService,
-            AnalyzeParagraph analyzeParagraph) {
+            AnalyzeParagraph analyzeParagraph,
+            EmbeddingStorageService embeddingStorageService) {
         this.referenceNewsCustomRepository = referenceNewsCustomRepository;
         this.analyseByTitle = analyseByTitle;
         this.analyseByContent = analyseByContent;
         this.keywordService = keywordService;
         this.keywordExtractorService = keywordExtractorService;
         this.analyzeParagraph = analyzeParagraph;
+        this.embeddingStorageService = embeddingStorageService;
     }
 
 
@@ -51,22 +55,20 @@ public class BiasAnalyseService {
                     .paragraphReasons(null)
                     .build();
         }
-//
-//        // 3. 검색된 레퍼런스 뉴스 기사들의 본문 내용 추출
-//        List<String> referenceContents = referenceNews.stream()
-//                .map(ReferenceNewsArticle::getContent)
-//                .collect(Collectors.toList());
-//
-//        if (referenceContents.size() < 2) {
-//            System.out.println("❌ 비교할 레퍼런스 뉴스 문단이 부족함");
-//            return BiasAnalysisResult.builder()
-//                    .biasScore(50.0)
-//                    .reliability(50.0)
-//                    .paragraphReliabilities(null)
-//                    .paragraphReasons(null)
-//                    .build();
-//        }
-//
+
+        // 3. 검색된 레퍼런스 뉴스 기사들의 임베딩 저장
+        for (ReferenceNewsArticle referenceNews : referenceNewsList) {
+            embeddingStorageService.storeReferenceNews(
+                    EmbeddingStorageService.EmbeddingRequest.builder()
+                            .id(referenceNews.getId())
+                            .title(referenceNews.getTitle())
+                            .content(referenceNews.getContent())
+                            .paragraphs(referenceNews.getParagraphs())
+                            .pubDate(referenceNews.getPubDate())
+                            .build()
+            );
+        }
+
         // 4. 제목으로 분석 : FastAPI 서버로 NLP 검증 요청
         double bias_title = analyseByTitle.checkTitleWithReference(id, referenceNewsList);
 

@@ -1,11 +1,13 @@
 package com.ssafy.goose.domain.contentsearch.external;
 
 import com.ssafy.goose.domain.contentsearch.dto.NewsResponseDto;
+import com.ssafy.goose.domain.news.service.EmbeddingStorageService;
 import com.ssafy.goose.domain.news.service.bias.BiasAnalysisResult;
 import com.ssafy.goose.domain.news.service.bias.BiasAnalyseService;
 import com.ssafy.goose.domain.news.service.crawling.NewsContentScraping;
 import com.ssafy.goose.domain.news.service.paragraph.NewsParagraphSplitService;
 import jakarta.annotation.PostConstruct;
+import org.bson.types.ObjectId;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -56,6 +58,9 @@ public class NewsSearchService implements InternetSearchService {
     @Autowired
     private NewsParagraphSplitService newsParagraphSplitService;
 
+    @Autowired
+    private EmbeddingStorageService embeddingStorageService;
+
     // ✅ SSL 인증 우회 설정 추가 (애플리케이션 시작 시 자동 실행)
     @PostConstruct
     public void init() {
@@ -80,9 +85,9 @@ public class NewsSearchService implements InternetSearchService {
             criteriaList.add(keywordCriteria);
         }
 
-// 모든 키워드 조건을 AND로 결합 (각 키워드가 모두 등장해야 함)
+// 모든 키워드 조건을 AND로 결합 (각 키워드가 모두 등장해야 함) -> 현재 or 결합으로 임시 변경
         if (!criteriaList.isEmpty()) {
-            query.addCriteria(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])));
+            query.addCriteria(new Criteria().orOperator(criteriaList.toArray(new Criteria[0])));
         }
 
 // 검색 결과 최대 5개 제한
@@ -106,17 +111,30 @@ public class NewsSearchService implements InternetSearchService {
             resultData = resultData.subList(0, 5);
         }
 
-        // 4️⃣ 각 결과마다 분석 수행하여 DTO 업데이트
-        // (예: 제목, 본문, 문단 리스트를 사용하여 편향/신뢰도 분석 후 결과를 set)
         System.out.println("MongoDB, 네이버 검색으로 가져온 뉴스들 신뢰도 점수 부여 시작, resultData 수 : " + resultData.size());
         for (NewsResponseDto dto : resultData) {
-            // dto.getParagraphs()가 List<String> 타입이라고 가정
+            String newsId = new ObjectId().toString();
+            dto.setId(newsId);
+
+            // 4️⃣ 크로마 DB에 저장 요청
+            embeddingStorageService.storeNews(
+                    EmbeddingStorageService.EmbeddingRequest.builder()
+                            .id(newsId)
+                            .title(dto.getTitle())
+                            .content(dto.getContent())
+                            .paragraphs(dto.getParagraphs())
+                            .pubDate(dto.getPubDate())
+                            .build()
+            );
+
+            // 5️⃣ 각 결과마다 분석 수행하여 DTO 업데이트 (예: 제목, 본문, 문단 리스트를 사용하여 편향/신뢰도 분석 후 결과를 set)
             BiasAnalysisResult analysisResult = biasAnalyseService.analyzeBias(
                     dto.getId(),
                     dto.getTitle(),
                     dto.getContent(),
                     dto.getParagraphs()
             );
+
             dto.setBiasScore(analysisResult.getBiasScore());
             dto.setReliability(analysisResult.getReliability());
             dto.setParagraphReliabilities(analysisResult.getParagraphReliabilities());
@@ -170,7 +188,7 @@ public class NewsSearchService implements InternetSearchService {
             List<String> paragraphs = newsParagraphSplitService.getSplitParagraphs(content);
 
             NewsResponseDto newsDto = NewsResponseDto.builder()
-                    .id(null) // Naver API에서 id 정보가 없다면 null 처리
+                    .id(null)
                     .title(cleanTitle)
                     .originalLink(originalLink)
                     .naverLink(naverLink)

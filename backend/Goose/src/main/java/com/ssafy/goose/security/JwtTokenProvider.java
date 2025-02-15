@@ -67,6 +67,8 @@ public class JwtTokenProvider {
             return !claims.getBody().getExpiration().before(new Date());
         } catch (ExpiredJwtException e) {
             return false;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
         }
     }
 }

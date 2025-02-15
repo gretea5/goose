@@ -71,18 +71,7 @@ public class UserService {
             return UserResponseDto.error("비밀번호가 일치하지 않습니다.");
         }
 
-        // AccessToken 생성
-        String accessToken = jwtTokenProvider.createAccessToken(user.getUsername());
-
-        // 기존 RefreshToken이 있으면 유지, 없으면 새로 생성
-        String refreshToken = user.getToken();
-        if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
-            refreshToken = jwtTokenProvider.createRefreshToken(user.getUsername());
-            user.setToken(refreshToken);
-            userRepository.save(user);
-        }
-
-        return UserResponseDto.success(accessToken, refreshToken);
+        return generateNewTokens(user); // ✅ 로그인 시점에서 동일한 토큰 처리 로직 사용
     }
 
     // 로그아웃
@@ -101,7 +90,41 @@ public class UserService {
 
         return UserResponseDto.success();
     }
-    
+
+    // RefreshToken을 사용한 AccessToken 재발급
+    public UserResponseDto refreshAccessToken(String refreshToken) {
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            // ✅ 검증 실패 시 DB에서 삭제하고 에러 반환
+            User user = userRepository.findByToken(refreshToken).orElse(null);
+            if (user != null) {
+                user.setToken(null);
+                userRepository.save(user);
+            }
+            return UserResponseDto.error("유효하지 않은 RefreshToken입니다.");
+        }
+
+        String username = jwtTokenProvider.getUsername(refreshToken);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        return generateNewTokens(user); // ✅ 동일한 로직으로 토큰 처리
+    }
+
+    // ✅ AccessToken & RefreshToken을 생성하는 공통 메서드
+    private UserResponseDto generateNewTokens(User user) {
+        String accessToken = jwtTokenProvider.createAccessToken(user.getUsername());
+
+        // 기존 RefreshToken이 유효한 경우 유지, 아니면 새로 발급
+        String refreshToken = user.getToken();
+        if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
+            refreshToken = jwtTokenProvider.createRefreshToken(user.getUsername());
+            user.setToken(refreshToken);
+            userRepository.save(user);
+        }
+
+        return UserResponseDto.success(accessToken, refreshToken);
+    }
+
     // 회원 가입 시 ID 중복 체크
     public UserCheckResponseDto checkUsernameAvailability(String username) {
         boolean exists = userRepository.findByUsername(username).isPresent();
@@ -114,33 +137,6 @@ public class UserService {
         boolean exists = userRepository.findByNickname(nickname).isPresent();
         return exists ? new UserCheckResponseDto(false, "이미 사용 중인 닉네임입니다.")
                 : new UserCheckResponseDto(true, "사용 가능한 닉네임입니다.");
-    }
-
-    // RefreshToken 검증 및 AccessToken 재발급
-    public UserResponseDto refreshAccessToken(String refreshToken) {
-        // RefreshToken 유효성 검증
-        if (!jwtTokenProvider.validateToken(refreshToken)) {
-            return UserResponseDto.error("유효하지 않은 RefreshToken입니다.");
-        }
-
-        String username = jwtTokenProvider.getUsername(refreshToken);
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
-        // 요청된 RefreshToken과 DB에 저장된 RefreshToken이 같은지 확인
-        if (!refreshToken.equals(user.getToken())) {
-            return UserResponseDto.error("RefreshToken이 일치하지 않습니다.");
-        }
-
-        // RefreshToken을 즉시 폐기 및 새로 발급
-        String newRefreshToken = jwtTokenProvider.createRefreshToken(username);
-        user.setToken(newRefreshToken);
-        userRepository.save(user);
-
-        // 새로운 AccessToken 발급
-        String newAccessToken = jwtTokenProvider.createAccessToken(username);
-
-        return UserResponseDto.success(newAccessToken, newRefreshToken);
     }
 
     //읽은 뉴스 조회

@@ -17,7 +17,8 @@ import java.util.Map;
 @Service
 public class AnalyseByTitle {
     private final RestTemplate restTemplate = new RestTemplate();
-    private static final String TITLE_COMPARE_CONTENTS_API_URL = "http://http://i12d208.p.ssafy.io/:5062/title-compare-contents";
+    //    private static final String TITLE_COMPARE_CONTENTS_API_URL = "http://i12d208.p.ssafy.io:5062/title-compare-contents";
+    private static final String TITLE_COMPARE_CONTENTS_API_URL = "http://localhost:5062/title-compare-contents";
 
     public double checkTitleWithReference(String newsId, List<ReferenceNewsArticle> referenceNewsList) {
         try {
@@ -27,6 +28,8 @@ public class AnalyseByTitle {
             double totalScore = 0.0;
 
             for (ReferenceNewsArticle referenceNews : referenceNewsList) {
+                System.out.println("제목과 내용 임베딩 차이 구하기, newsId : "+newsId);
+                System.out.println("제목과 내용 임베딩 차이 구하기, referenceNewsId : "+referenceNews.getId());
                 // ✅ 요청 데이터 생성
                 Map<String, String> requestBody = new HashMap<>();
                 requestBody.put("newsId", newsId);
@@ -41,8 +44,9 @@ public class AnalyseByTitle {
                 ResponseEntity<String> response = restTemplate.postForEntity(TITLE_COMPARE_CONTENTS_API_URL, requestEntity, String.class);
 
                 // ✅ JSON 응답 파싱
-                Map<String, Double> responseBody = new ObjectMapper().readValue(response.getBody(), new TypeReference<Map<String, Double>>() {});
-                double similarity_score = responseBody.get("similarity_score");
+                Map<String, Object> responseBody = new ObjectMapper().readValue(response.getBody(), new TypeReference<Map<String, Object>>() {});
+                double similarity_score = ((Number) responseBody.get("similarity_score")).doubleValue();
+
 
                 System.out.println("[제목분석] similarity_score : " + similarity_score);
 

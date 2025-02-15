@@ -17,7 +17,8 @@ import java.util.Map;
 @Service
 public class AnalyseByContent {
     private final RestTemplate restTemplate = new RestTemplate();
-    private static final String CONTENT_COMPARE_CONTENTS_API_URL = "http://http://i12d208.p.ssafy.io/:5062/content-compare-contents";
+//    private static final String CONTENT_COMPARE_CONTENTS_API_URL = "http://i12d208.p.ssafy.io:5062/content-compare-contents";
+    private static final String CONTENT_COMPARE_CONTENTS_API_URL = "http://localhost:5062/paragraph-compare-contents";
 
     public double checkContentWithReference(String newsId, List<ReferenceNewsArticle> referenceNewsList) {
         try {
@@ -41,13 +42,19 @@ public class AnalyseByContent {
                 ResponseEntity<String> response = restTemplate.postForEntity(CONTENT_COMPARE_CONTENTS_API_URL, requestEntity, String.class);
 
                 // ✅ JSON 응답 파싱
-                Map<String, Double> responseBody = new ObjectMapper().readValue(response.getBody(), new TypeReference<Map<String, Double>>() {});
-                double similarity_score = responseBody.get("similarity_score");
+                Map<String, Object> responseBody = new ObjectMapper().readValue(response.getBody(), new TypeReference<Map<String, Object>>() {});
 
-                System.out.println("[내용분석] similarity_score : " + similarity_score);
+                List<Map<String, Object>> similarities = (List<Map<String, Object>>) responseBody.get("similarities");
+
+                double maxSimilarityScore = similarities.stream()
+                        .mapToDouble(s -> ((Number) s.get("similarity")).doubleValue())
+                        .max()
+                        .orElse(0.0);
+
+                System.out.println("[내용분석] similarity_score : " + maxSimilarityScore);
 
                 // ✅ 점수 합산
-                totalScore += similarity_score;
+                totalScore += maxSimilarityScore;
             }
 
             // ✅ 평균 점수 계산 (0.0 ~ 1.0 범위)

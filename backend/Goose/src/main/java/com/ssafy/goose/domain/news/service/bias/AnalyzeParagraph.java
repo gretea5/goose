@@ -58,7 +58,7 @@ public class AnalyzeParagraph {
 //                    System.out.println();
 //                    System.out.println();
 //                }
-
+                System.out.println("✅ 문단별 신뢰도 및 분석 근거 추출 완료");
                 return new ParagraphAnalysisResult(reliabilityScores, bestMatches);
             }
         } catch (Exception e) {

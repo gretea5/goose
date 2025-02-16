@@ -6,46 +6,39 @@ import com.ssafy.goose.domain.news.entity.ReferenceNewsArticle;
 import com.ssafy.goose.domain.news.repository.ReferenceNewsCustomRepository;
 import com.ssafy.goose.domain.news.service.EmbeddingStorageService;
 import com.ssafy.goose.domain.news.service.keyword.TitleKeywordExtractor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @Service
+@RequiredArgsConstructor
 public class BiasAnalyseService {
+
     private final ReferenceNewsCustomRepository referenceNewsCustomRepository;
     private final AnalyseByTitle analyseByTitle;
     private final AnalyseByContent analyseByContent;
-    private final TitleKeywordExtractor keywordExtractorService;
-    private final KeywordService keywordService;
     private final AnalyzeParagraph analyzeParagraph;
     private final EmbeddingStorageService embeddingStorageService;
 
-    public BiasAnalyseService(
-            ReferenceNewsCustomRepository referenceNewsCustomRepository,
-            AnalyseByTitle analyseByTitle,
-            AnalyseByContent analyseByContent,
-            KeywordService keywordService,
-            TitleKeywordExtractor keywordExtractorService,
-            AnalyzeParagraph analyzeParagraph,
-            EmbeddingStorageService embeddingStorageService) {
-        this.referenceNewsCustomRepository = referenceNewsCustomRepository;
-        this.analyseByTitle = analyseByTitle;
-        this.analyseByContent = analyseByContent;
-        this.keywordService = keywordService;
-        this.keywordExtractorService = keywordExtractorService;
-        this.analyzeParagraph = analyzeParagraph;
-        this.embeddingStorageService = embeddingStorageService;
-    }
-
+    // ✅ 병렬 작업용 스레드 풀 설정 (코어: 5, 최대: 10, 큐: 100)
+    private final ExecutorService executorService = new ThreadPoolExecutor(
+            5, 10, 30L, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(100),
+            new CustomizableThreadFactory("bias-analyse-")
+    );
 
     public BiasAnalysisResult analyzeBias(String id, String title, String content, List<String> paragraphs) {
         System.out.println("analyzeBias 수행, title : " + title);
 
         // 2. 레퍼런스 뉴스 검색
         List<ReferenceNewsArticle> referenceNewsList = referenceNewsCustomRepository.findNewsByKeywords(title, content);
-
         if (referenceNewsList.isEmpty()) {
             System.out.println("❌ 해당 키워드와 관련된 최근 뉴스 없음");
             return BiasAnalysisResult.builder()
@@ -56,7 +49,7 @@ public class BiasAnalyseService {
                     .build();
         }
 
-        // 3. 검색된 레퍼런스 뉴스 기사들의 임베딩 저장
+        // 3. 임베딩 저장 (동기 처리)
         for (ReferenceNewsArticle referenceNews : referenceNewsList) {
             embeddingStorageService.storeReferenceNews(
                     EmbeddingStorageService.EmbeddingRequest.builder()
@@ -69,24 +62,40 @@ public class BiasAnalyseService {
             );
         }
 
-        // 4. 제목으로 분석 : FastAPI 서버로 NLP 검증 요청
-        double bias_title = analyseByTitle.checkTitleWithReference(id, referenceNewsList);
+        try {
+            // 4, 5, 6 병렬 실행
+            CompletableFuture<Double> titleFuture = CompletableFuture.supplyAsync(
+                    () -> analyseByTitle.checkTitleWithReference(id, referenceNewsList), executorService
+            );
 
-        // 5. 내용으로 분석 : FastAPI 서버로 NLP 검증 요청
-        double bias_content = analyseByContent.checkContentWithReference(id, referenceNewsList);
+            CompletableFuture<Double> contentFuture = CompletableFuture.supplyAsync(
+                    () -> analyseByContent.checkContentWithReference(id, referenceNewsList), executorService
+            );
 
-        // 6. 문단 신뢰성 분석 요청 (FastAPI 호출)
-        ParagraphAnalysisResult analysisResult = analyzeParagraph.analyze(title, paragraphs);
-        double paragraph_reliability = analysisResult.getAverageReliability();
+            CompletableFuture<ParagraphAnalysisResult> paragraphFuture = CompletableFuture.supplyAsync(
+                    () -> analyzeParagraph.analyze(title, paragraphs), executorService
+            );
 
-        double finalScore = (bias_title + bias_content + paragraph_reliability) / 3;
-//        double finalScore = paragraph_reliability;
+            // ✅ 병렬 작업 완료 대기
+            Double bias_title = titleFuture.get();  // 블로킹 (결과 기다림)
+            Double bias_content = contentFuture.get();
+            ParagraphAnalysisResult paragraphAnalysisResult = paragraphFuture.get();
 
-        return BiasAnalysisResult.builder()
-                .biasScore(finalScore)
-                .reliability(finalScore)
-                .paragraphReliabilities(analysisResult.getReliabilityScores())
-                .paragraphReasons(analysisResult.getBestMatches())
-                .build();
+            Double paragraph_reliability = paragraphAnalysisResult.getAverageReliability();
+
+            double finalScore = (bias_title + bias_content + paragraph_reliability) / 3;
+
+            return BiasAnalysisResult.builder()
+                    .biasScore(finalScore)
+                    .reliability(finalScore)
+                    .paragraphReliabilities(paragraphAnalysisResult.getReliabilityScores())
+                    .paragraphReasons(paragraphAnalysisResult.getBestMatches())
+                    .build();
+
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Bias analysis failed", e);
+        }
     }
 }
+

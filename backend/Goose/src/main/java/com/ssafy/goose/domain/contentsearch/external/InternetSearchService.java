@@ -10,6 +10,4 @@ public interface InternetSearchService {
 
     NewsResponseDto searchByUrl(String url);
 
-    // 언론사 정보 가져오기 (크롤링)
-    String extractNewsAgency(String newsUrl);
 }

@@ -35,9 +35,9 @@ public class EmbeddingStorageService {
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
             ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
-            System.out.println("요청 성공: " + response.getBody());
+//            System.out.println("요청 성공: " + response.getBody());
         } catch (Exception e) {
-            System.err.println("요청 실패: " + e.getMessage());
+//            System.err.println("요청 실패: " + e.getMessage());
             e.printStackTrace();
         }
     }

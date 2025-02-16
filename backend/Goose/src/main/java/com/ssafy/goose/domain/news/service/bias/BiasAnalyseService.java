@@ -50,17 +50,41 @@ public class BiasAnalyseService {
         }
 
         // 3. 임베딩 저장 (동기 처리)
-        for (ReferenceNewsArticle referenceNews : referenceNewsList) {
-            embeddingStorageService.storeReferenceNews(
-                    EmbeddingStorageService.EmbeddingRequest.builder()
-                            .id(referenceNews.getId())
-                            .title(referenceNews.getTitle())
-                            .content(referenceNews.getContent())
-                            .paragraphs(referenceNews.getParagraphs())
-                            .pubDate(referenceNews.getPubDate())
-                            .build()
-            );
-        }
+//        for (ReferenceNewsArticle referenceNews : referenceNewsList) {
+//            embeddingStorageService.storeReferenceNews(
+//                    EmbeddingStorageService.EmbeddingRequest.builder()
+//                            .id(referenceNews.getId())
+//                            .title(referenceNews.getTitle())
+//                            .content(referenceNews.getContent())
+//                            .paragraphs(referenceNews.getParagraphs())
+//                            .pubDate(referenceNews.getPubDate())
+//                            .build()
+//            );
+//            System.out.println("referenceNews 임베딩 저장");
+//        }
+
+        // 3. 임베딩 저장 (비동기 병렬 처리)
+        ExecutorService executor = Executors.newFixedThreadPool(20); // 병렬 처리 스레드 수 설정
+
+        List<CompletableFuture<Void>> futures = referenceNewsList.stream()
+                .map(referenceNews -> CompletableFuture.runAsync(() -> {
+                    embeddingStorageService.storeReferenceNews(
+                            EmbeddingStorageService.EmbeddingRequest.builder()
+                                    .id(referenceNews.getId())
+                                    .title(referenceNews.getTitle())
+                                    .content(referenceNews.getContent())
+                                    .paragraphs(referenceNews.getParagraphs())
+                                    .pubDate(referenceNews.getPubDate())
+                                    .build()
+                    );
+                    System.out.println("referenceNews 임베딩 저장 완료: " + referenceNews.getId());
+                }, executor))
+                .toList();
+
+        // 모든 작업 완료 대기
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        executor.shutdown();
 
         try {
             // 4, 5, 6 병렬 실행

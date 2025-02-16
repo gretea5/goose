@@ -91,23 +91,23 @@ public class NewsSearchService implements InternetSearchService {
         }
 
 // 검색 결과 최대 5개 제한
-        query.limit(5);
+        query.limit(1);
 
         List<NewsResponseDto> mongoData = mongoTemplate.find(query, NewsResponseDto.class, "news_articles");
 
 
         int mongoDataSize = mongoData.size();
-        int neededFromNaver = 5 - mongoDataSize;
+        int neededFromNaver = 1 - mongoDataSize;
         System.out.println("MongoDB 데이터 추출 갯수 : " + mongoDataSize);
 
         // 3️⃣ MongoDB 데이터 부족 시 Naver API 호출
         List<NewsResponseDto> resultData = new ArrayList<>(mongoData);
-        if (mongoDataSize < 5) {
+        if (mongoDataSize < 1) {
             List<NewsResponseDto> naverData = fetchNaverNews(keywords);
             resultData.addAll(naverData.subList(0, Math.min(neededFromNaver, naverData.size())));
         }
 
-        if (resultData.size() > 5) {
+        if (resultData.size() > 1) {
             resultData = resultData.subList(0, 5);
         }
 

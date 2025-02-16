@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Tag(name = "User API", description = "회원가입, 로그인, 로그아웃 기능을 제공하는 API")
 @RestController
 @RequestMapping("/api/users")
@@ -56,15 +54,5 @@ public class UserController {
     @Operation(summary = "닉네임 중복 확인", description = "사용 가능한 닉네임인지 확인합니다.")
     public ResponseEntity<UserCheckResponseDto> checkNickname(@RequestParam String nickname) {
         return ResponseEntity.ok(userService.checkNicknameAvailability(nickname));
-    }
-
-    //읽은 뉴스 조회 기능 추가
-    @GetMapping("/{userId}/determinations")
-    @Operation(summary = "뉴스 판별 기록 조회", description = "사용자의 최근 10개 뉴스 판별 기록을 조회합니다.")
-    public ResponseEntity<List<NewsDeterminationResponseDto>> getDeterminations(
-            @PathVariable Long userId,
-            @RequestHeader("Authorization") String authorizationHeader) {
-        String token = authorizationHeader.replace("Bearer ", "");
-        return ResponseEntity.ok(userService.getNewsDeterminations(userId, token));
     }
 }

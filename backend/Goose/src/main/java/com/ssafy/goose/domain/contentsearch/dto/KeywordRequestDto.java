@@ -7,7 +7,8 @@ import lombok.Setter;
 @Setter
 public class KeywordRequestDto {
 
-    private String text; // 안드로이드에서 받아온 텍스트
+    private String text;         // 안드로이드에서 받아온 텍스트
+    private String analysisType; // "content", "image", "url" 중 하나
 
     public void setText(String text) {
         if (text != null) {

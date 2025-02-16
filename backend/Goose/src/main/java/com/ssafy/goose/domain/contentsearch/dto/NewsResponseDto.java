@@ -56,9 +56,7 @@ public class NewsResponseDto {
                 '}';
     }
 
-    /**
-     * pubDate를 파싱하여 타임스탬프로 변환합니다.
-     */
+
     public long getPubDateTimestamp() {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(

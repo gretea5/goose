@@ -12,7 +12,7 @@ import javax.sql.DataSource;
 @EnableJpaRepositories(basePackages = {
         "com.ssafy.goose.domain.user.repository",
         "com.ssafy.goose.domain.game.statistics.repository",
-        "com.ssafy.goose.domain.warning.repository"
+        "com.ssafy.goose.domain.warning.repository",
 })
 public class DatabaseConfig {
 

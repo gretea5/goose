@@ -144,6 +144,81 @@ public class NewsSearchService implements InternetSearchService {
         return resultData;
     }
 
+    @Override
+    public NewsResponseDto searchByUrl(String url) {
+        try {
+            // 1️⃣ 뉴스 본문 크롤링
+            Map<String, Object> scrapedData = newsContentScraping.extractArticle(url);
+
+            if (scrapedData == null || !scrapedData.containsKey("text")) {
+                System.out.println("❌ 뉴스 본문 크롤링 실패");
+                return null;
+            }
+
+            String cleanTitle = (String) scrapedData.get("title");
+            String content = (String) scrapedData.get("text");
+            String topImage = (String) scrapedData.get("image");
+
+            if (content.length() < 100) {
+                System.out.println("❌ 본문이 너무 짧아서 제외");
+                return null;
+            }
+
+            // 2️⃣ 문단 분리 수행
+            List<String> paragraphs = newsParagraphSplitService.getSplitParagraphs(content);
+
+            // 3️⃣ ID 생성 및 기사 객체 생성
+            String newsId = new ObjectId().toString();
+            NewsResponseDto newsDto = NewsResponseDto.builder()
+                    .id(newsId)
+                    .title(cleanTitle)
+                    .originalLink(url)
+                    .naverLink(url)
+                    .description("")  // URL 직접 검색이므로 description 없음
+                    .pubDate("")       // URL 직접 검색이므로 pubDate 없음
+                    .content(content)
+                    .paragraphs(paragraphs)
+                    .paragraphReliabilities(new ArrayList<>())
+                    .paragraphReasons(new ArrayList<>())
+                    .topImage(topImage)
+                    .extractedAt(LocalDateTime.now())
+                    .biasScore(0.0)
+                    .reliability(50.0)
+                    .build();
+
+            // 4️⃣ 크로마 DB에 저장
+            embeddingStorageService.storeNews(
+                    EmbeddingStorageService.EmbeddingRequest.builder()
+                            .id(newsId)
+                            .title(cleanTitle)
+                            .content(content)
+                            .paragraphs(paragraphs)
+                            .pubDate("")  // 직접 입력이므로 공백
+                            .build()
+            );
+
+            // 5️⃣ 신뢰도 분석 수행
+            BiasAnalysisResult analysisResult = biasAnalyseService.analyzeBias(
+                    newsDto.getId(),
+                    newsDto.getTitle(),
+                    newsDto.getContent(),
+                    newsDto.getParagraphs()
+            );
+
+            // 6️⃣ 분석 결과 반영
+            newsDto.setBiasScore(analysisResult.getBiasScore());
+            newsDto.setReliability(analysisResult.getReliability());
+            newsDto.setParagraphReliabilities(analysisResult.getParagraphReliabilities());
+            newsDto.setParagraphReasons(analysisResult.getParagraphReasons());
+
+            return newsDto;
+        } catch (Exception e) {
+            System.err.println("❌ searchByUrl() 실패: " + e.getMessage());
+            return null;
+        }
+    }
+
+
     private List<NewsResponseDto> fetchNaverNews(String[] keywords) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();

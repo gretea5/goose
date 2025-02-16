@@ -40,7 +40,8 @@ public class SecurityConfig {
                                 "/webjars/**",
                                 "/api/users/**",
                                 "/api/news/**",
-                                "/api/content/**"
+                                "/api/content/**",
+                                "/api/warnings/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

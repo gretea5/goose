@@ -11,7 +11,8 @@ import javax.sql.DataSource;
 @Configuration
 @EnableJpaRepositories(basePackages = {
         "com.ssafy.goose.domain.user.repository",
-        "com.ssafy.goose.domain.game.statistics.repository"
+        "com.ssafy.goose.domain.game.statistics.repository",
+        "com.ssafy.goose.domain.warning.repository"
 })
 public class DatabaseConfig {
 

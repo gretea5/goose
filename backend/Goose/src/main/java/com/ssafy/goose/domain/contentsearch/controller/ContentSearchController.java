@@ -3,6 +3,7 @@ package com.ssafy.goose.domain.contentsearch.controller;
 import com.ssafy.goose.domain.contentsearch.dto.KeywordRequestDto;
 import com.ssafy.goose.domain.contentsearch.dto.KeywordResponseDto;
 import com.ssafy.goose.domain.contentsearch.dto.NewsResponseDto;
+import com.ssafy.goose.domain.contentsearch.external.NewsSearchService;
 import com.ssafy.goose.domain.contentsearch.service.ContentService;
 import com.ssafy.goose.domain.contentsearch.service.KeywordService;
 import com.ssafy.goose.domain.contentsearch.service.SearchService;
@@ -22,6 +23,7 @@ public class ContentSearchController {
     private final KeywordService keywordService;
     private final SearchService searchService;
     private final ContentService contentService;
+    private final NewsSearchService newsSearchService;
 
     // 키워드 추출 API
     @PostMapping("/keywords")
@@ -46,5 +48,12 @@ public class ContentSearchController {
     public List<NewsResponseDto> extractKeywordsAndSearch(@RequestBody KeywordRequestDto requestDto) {
         // 안드로이드에서 받은 텍스트로 키워드 추출 및 뉴스 검색 실행
         return contentService.processKeywordAndSearch(requestDto.getText());
+    }
+
+    // URL로 뉴스 본문 가져오기 및 분석 API
+    @GetMapping("/search-by-url")
+    @Operation(summary = "뉴스 URL 검색", description = "뉴스 URL을 입력받아 본문 크롤링, 문단 분리, 신뢰도 분석을 수행합니다.")
+    public NewsResponseDto searchNewsByUrl(@RequestParam String url) {
+        return newsSearchService.searchByUrl(url);
     }
 }

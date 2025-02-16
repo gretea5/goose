@@ -2,8 +2,10 @@ package com.ssafy.goose.domain.warning.controller;
 
 import com.ssafy.goose.domain.warning.service.NewsWarningCrawlerService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Warning News Agency API", description = "정정보도 언론사 크롤링 API")
 @RestController
 @RequestMapping("/api/warnings")
 public class WarningNewsAgencyController {

@@ -28,34 +28,43 @@ public class NewsContentScraping {
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(requestBody, headers);
 
         try {
-//            System.out.println("🔍 [NewsContentScraping] FastAPI 요청 시작: " + url);
             ResponseEntity<Map> response = restTemplate.exchange(FASTAPI_NEWS_URL, HttpMethod.POST, entity, Map.class);
             Map<String, Object> result = response.getBody();
 
-            // ✅ 크롤링 성공 로그
             if (result != null) {
-                // 🔹 1. HTML 엔터티 디코딩 (`&lt;`, `&gt;`, `&#x27;` 등)
+                // 🔹 제목(title) HTML 엔티티 디코딩 + HTML 태그 제거
                 String rawTitle = (String) result.get("title");
-                String decodedTitle = StringEscapeUtils.unescapeHtml4(rawTitle); // ✅ HTML 엔터티 변환
+                if (rawTitle != null) {
+                    String cleanTitle = cleanHtml(rawTitle);
+                    result.put("title", cleanTitle);
+                }
 
-                // 🔹 2. HTML 태그 제거 (`<b>`, `</b>` 등)
-                String cleanTitle = Jsoup.parse(decodedTitle).text(); // ✅ HTML 태그 제거
+                // 🔹 본문(content) HTML 엔티티 디코딩 + HTML 태그 제거
+                String rawContent = (String) result.get("text");
+                if (rawContent != null) {
+                    String cleanContent = cleanHtml(rawContent);
+                    result.put("text", cleanContent);
+                }
 
-                // 🔹 결과 반영
-                result.put("title", cleanTitle);
-
-//                System.out.println("✅ [NewsContentScraping] 크롤링 성공");
-//                System.out.println("  📌 제목: " + cleanTitle);
-//                System.out.println("  📌 본문 (앞부분): " + ((String) result.get("text")).substring(0, Math.min(200, ((String) result.get("text")).length())) + "...");
-//                System.out.println("  📌 대표 이미지: " + result.get("image"));
-            } else {
-//                System.out.println("⚠️ [NewsContentScraping] 크롤링 결과가 null입니다.");
+                // 🔹 설명(description) HTML 엔티티 디코딩 + HTML 태그 제거
+                String rawDescription = (String) result.get("description");
+                if (rawDescription != null) {
+                    String cleanDescription = cleanHtml(rawDescription);
+                    result.put("description", cleanDescription);
+                }
             }
 
             return result;
         } catch (Exception e) {
-//            System.err.println("❌ [NewsContentScraping] 크롤링 실패: " + e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * HTML 엔티티 디코딩 및 HTML 태그 제거 유틸리티 메서드
+     */
+    private String cleanHtml(String htmlText) {
+        String unescaped = StringEscapeUtils.unescapeHtml4(htmlText); // HTML 엔티티 디코딩
+        return Jsoup.parse(unescaped).text(); // HTML 태그 제거
     }
 }

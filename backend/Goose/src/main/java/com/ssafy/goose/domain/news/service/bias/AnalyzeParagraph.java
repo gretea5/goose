@@ -23,17 +23,16 @@ public class AnalyzeParagraph {
         this.restTemplate = new RestTemplate();
     }
 
-    public ParagraphAnalysisResult analyze(String title, List<String> paragraphs) {
-        // ✅ FastAPI 요청 데이터 생성
+    public ParagraphAnalysisResult analyze(String title, List<String> paragraphs, List<String> referenceParagraphIds) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("news", Map.of(
                 "title", title,
-
                 "paragraphs", paragraphs
         ));
+        requestBody.put("referenceParagraphIds", referenceParagraphIds);
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
@@ -51,7 +50,7 @@ public class AnalyzeParagraph {
             System.err.println("❌ FastAPI 요청 실패: " + e.getMessage());
         }
 
-        // 오류 발생 시 기본값 반환
         return new ParagraphAnalysisResult(List.of(50.0), List.of());
     }
+
 }

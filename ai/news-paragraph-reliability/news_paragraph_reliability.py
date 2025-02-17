@@ -39,50 +39,66 @@ class NewsArticle(BaseModel):
 
 class NewsReliabilityRequest(BaseModel):
     news: NewsArticle
+    referenceParagraphIds: List[str]
 
-def query_similar_paragraph(query_text: str, n_results: int = 1):
-    result = reference_paragraph_collection.query(
-        query_texts=[query_text],  # 임베딩 대신 raw text로 검색!
-        n_results=n_results,
-        include=["documents", "distances"]
-    )
-    if result and result["documents"] and result["documents"][0]:
-        best_doc = result["documents"][0][0]
-        best_distance = result["distances"][0][0]
-        similarity_score = 1 / (1 + best_distance)  # 거리 → 유사도 변환
-        return best_doc, similarity_score
-    return None, 0.0
+def fetch_reference_embeddings(reference_ids):
+    result = reference_paragraph_collection.get(ids=reference_ids, include=["documents", "embeddings"])
+    id_to_embedding = {}
+    id_to_text = {}
+    for i, doc_id in enumerate(result["ids"]):
+        id_to_embedding[doc_id] = np.array(result["embeddings"][i])
+        id_to_text[doc_id] = result["documents"][i]
+    return id_to_embedding, id_to_text
 
 
-def analyze_paragraph(idx, title, paragraph):
-    similar_doc, similarity = query_similar_paragraph(paragraph)
+def compute_similarity(embedding1, embedding2):
+    similarity = np.dot(embedding1, embedding2) / (np.linalg.norm(embedding1) * np.linalg.norm(embedding2))
+    return similarity
 
-    if not similar_doc:
-        return idx, None, 0.0
 
-    return idx, similar_doc, similarity
+def analyze_paragraph(idx, paragraph_embedding, reference_embeddings, reference_texts):
+    best_similarity = -1
+    best_reference_id = None
+
+    for ref_id, ref_embedding in reference_embeddings.items():
+        similarity = compute_similarity(paragraph_embedding, ref_embedding)
+        if similarity > best_similarity:
+            best_similarity = similarity
+            best_reference_id = ref_id
+
+    best_reference_text = reference_texts.get(best_reference_id, "매칭 실패")
+    return idx, best_reference_text, best_similarity
 
 
 @app.post("/news/reliability")
 async def analyze_news_reliability(request: NewsReliabilityRequest):
     title = request.news.title
     news_paragraphs = request.news.paragraphs
+    reference_ids = request.referenceParagraphIds
 
-    if not news_paragraphs:
+    if not news_paragraphs or not reference_ids:
         return {
             "paragraph_reliability_scores": [],
             "best_evidence_paragraphs": []
         }
 
+    # 1. 레퍼런스 임베딩 한번에 가져오기
+    reference_embeddings, reference_texts = fetch_reference_embeddings(reference_ids)
+
+    # 2. 문단 임베딩 한번에 계산하기
+    paragraph_embeddings = bert_model.encode(news_paragraphs)
+
+    # 3. 병렬 실행
     best_evidence_paragraphs = [None] * len(news_paragraphs)
     reliability_scores = [0.0] * len(news_paragraphs)
 
     with ThreadPoolExecutor(max_workers=5) as executor:
-        futures = [executor.submit(analyze_paragraph, i, title, para) for i, para in enumerate(news_paragraphs)]
+        futures = [executor.submit(analyze_paragraph, i, paragraph_embeddings[i], reference_embeddings, reference_texts)
+                   for i in range(len(news_paragraphs))]
 
         for future in futures:
-            idx, summarized, similarity = future.result()
-            best_evidence_paragraphs[idx] = summarized
+            idx, best_text, similarity = future.result()
+            best_evidence_paragraphs[idx] = best_text
             reliability_scores[idx] = similarity
 
     return {

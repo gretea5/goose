@@ -1,5 +1,5 @@
-# Python 3.9 기반 이미지 사용
-FROM python:3.9
+# Python 3.10 기반 이미지 사용
+FROM python:3.10
 
 # Rust 설치: rustup을 통해 설치하고, PATH 환경변수를 업데이트
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \

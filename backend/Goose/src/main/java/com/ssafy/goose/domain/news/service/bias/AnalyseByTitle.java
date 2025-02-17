@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 @Service
 public class AnalyseByTitle {
@@ -23,47 +24,55 @@ public class AnalyseByTitle {
     public double checkTitleWithReference(String newsId, List<ReferenceNewsArticle> referenceNewsList) {
         try {
             int totalArticles = referenceNewsList.size();
-            if (totalArticles == 0) return 0.0; // 데이터가 없으면 0 반환
+            if (totalArticles == 0) return 0.0;
 
-            double totalScore = 0.0;
+            ExecutorService executor = Executors.newFixedThreadPool(5); // 스레드풀 생성 (적절히 조절)
 
-            for (ReferenceNewsArticle referenceNews : referenceNewsList) {
-                System.out.println("제목과 내용 임베딩 차이 구하기, newsId : " + newsId);
-                System.out.println("제목과 내용 임베딩 차이 구하기, referenceNewsId : " + referenceNews.getId());
-                // ✅ 요청 데이터 생성
-                Map<String, String> requestBody = new HashMap<>();
-                requestBody.put("newsId", newsId);
-                requestBody.put("referenceNewsId", referenceNews.getId());
+            List<CompletableFuture<Double>> futures = referenceNewsList.stream()
+                    .map(referenceNews -> CompletableFuture.supplyAsync(() -> {
+                        try {
+//                            System.out.println("제목과 내용 임베딩 차이 구하기, newsId : " + newsId);
+//                            System.out.println("제목과 내용 임베딩 차이 구하기, referenceNewsId : " + referenceNews.getId());
 
-                // ✅ HTTP 요청 설정
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-                HttpEntity<String> requestEntity = new HttpEntity<>(new ObjectMapper().writeValueAsString(requestBody), headers);
+                            Map<String, String> requestBody = new HashMap<>();
+                            requestBody.put("newsId", newsId);
+                            requestBody.put("referenceNewsId", referenceNews.getId());
 
-                // ✅ FastAPI 서버 호출
-                ResponseEntity<String> response = restTemplate.postForEntity(TITLE_COMPARE_CONTENTS_API_URL, requestEntity, String.class);
+                            HttpHeaders headers = new HttpHeaders();
+                            headers.setContentType(MediaType.APPLICATION_JSON);
+                            HttpEntity<String> requestEntity = new HttpEntity<>(new ObjectMapper().writeValueAsString(requestBody), headers);
 
-                // ✅ JSON 응답 파싱
-                Map<String, Object> responseBody = new ObjectMapper().readValue(response.getBody(), new TypeReference<Map<String, Object>>() {
-                });
-                double similarity_score = ((Number) responseBody.get("similarity_score")).doubleValue();
+                            ResponseEntity<String> response = restTemplate.postForEntity(TITLE_COMPARE_CONTENTS_API_URL, requestEntity, String.class);
+                            Map<String, Object> responseBody = new ObjectMapper().readValue(response.getBody(), new TypeReference<Map<String, Object>>() {});
 
+                            double similarity_score = ((Number) responseBody.get("similarity_score")).doubleValue();
 
-                System.out.println("[제목분석] similarity_score : " + similarity_score);
+                            System.out.println("[제목분석] similarity_score : " + similarity_score);
+                            return similarity_score;
 
-                // ✅ 점수 합산
-                totalScore += similarity_score;
-            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return 0.5; // 실패 시 기본값 반환
+                        }
+                    }, executor))
+                    .toList();
 
-            // ✅ 평균 점수 계산 (0.0 ~ 1.0 범위)
+            // 모든 병렬 작업 결과 수집
+            double totalScore = futures.stream()
+                    .map(CompletableFuture::join)
+                    .mapToDouble(Double::doubleValue)
+                    .sum();
+
+            executor.shutdown();
+
             double averageScore = totalScore * 100 / totalArticles;
             System.out.println("Title 사용, 평균 Bias (0.0 ~ 100.0 범위) : " + averageScore);
 
-            return averageScore; // 최종 평균 유사도 반환
+            return averageScore;
 
         } catch (Exception e) {
             e.printStackTrace();
-            return 50.0; // 오류 발생 시 50 반환
+            return 50.0;
         }
     }
 }

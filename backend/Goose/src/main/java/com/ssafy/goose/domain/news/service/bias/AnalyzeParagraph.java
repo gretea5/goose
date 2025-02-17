@@ -1,6 +1,5 @@
 package com.ssafy.goose.domain.news.service.bias;
 
-import com.ssafy.goose.domain.news.entity.ReferenceNewsArticle;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -11,14 +10,13 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class AnalyzeParagraph {
 
     // ✅ FastAPI 서버 URL (EC2 배포 시 주소 변경 필요)
-    private static final String FASTAPI_URL = "http://i12d208.p.ssafy.io:5061/news/reliability";
-//    private static final String FASTAPI_URL = "http://localhost:5061/news/reliability";
+//    private static final String FASTAPI_URL = "http://i12d208.p.ssafy.io:5061/news/reliability";
+    private static final String FASTAPI_URL = "http://localhost:5061/news/reliability";
     private final RestTemplate restTemplate;
 
     public AnalyzeParagraph() {
@@ -33,6 +31,7 @@ public class AnalyzeParagraph {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("news", Map.of(
                 "title", title,
+
                 "paragraphs", paragraphs
         ));
 
@@ -45,19 +44,6 @@ public class AnalyzeParagraph {
                 List<Double> reliabilityScores = (List<Double>) response.getBody().get("paragraph_reliability_scores");
                 List<String> bestMatches = (List<String>) response.getBody().get("best_evidence_paragraphs");
 
-                // ✅ best_matches를 콘솔에 출력
-//                System.out.println("✅ FastAPI 신뢰성 분석 결과:");
-//                for (int i = 0; i < bestMatches.size(); i++) {
-//                    System.out.println("🔹 문단 " + (i + 1) + " 신뢰성 점수: " + reliabilityScores.get(i));
-//                    System.out.println();
-//                    System.out.println("🔹 기존 문단 : ");
-//                    System.out.println(paragraphs.get(i));
-//                    System.out.println();
-//                    System.out.printf("🔹%.2f%% 확률로 올바른 내용\n", reliabilityScores.get(i) * 100);
-//                    System.out.println("   ➜ " + bestMatches.get(i));
-//                    System.out.println();
-//                    System.out.println();
-//                }
                 System.out.println("✅ 문단별 신뢰도 및 분석 근거 추출 완료");
                 return new ParagraphAnalysisResult(reliabilityScores, bestMatches);
             }

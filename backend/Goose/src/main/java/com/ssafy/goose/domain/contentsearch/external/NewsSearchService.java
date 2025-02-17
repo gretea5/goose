@@ -1,6 +1,8 @@
 package com.ssafy.goose.domain.contentsearch.external;
 
 import com.ssafy.goose.domain.contentsearch.dto.NewsResponseDto;
+import com.ssafy.goose.domain.news.entity.ReferenceNewsArticle;
+import com.ssafy.goose.domain.news.repository.ReferenceNewsCustomRepository;
 import com.ssafy.goose.domain.news.service.EmbeddingStorageService;
 import com.ssafy.goose.domain.news.service.bias.BiasAnalyseService;
 import com.ssafy.goose.domain.news.service.bias.BiasAnalysisResult;
@@ -61,6 +63,9 @@ public class NewsSearchService implements InternetSearchService {
     @Autowired
     private NewsAgencyExtractor newsAgencyExtractor;
 
+    @Autowired
+    private ReferenceNewsCustomRepository referenceNewsCustomRepository;
+
     @PostConstruct
     public void init() {
         trustAllCertificates();
@@ -69,7 +74,7 @@ public class NewsSearchService implements InternetSearchService {
     @Override
     public List<NewsResponseDto> search(String[] keywords) {
         // 반환할 갯수
-        int resultCount = 3;
+        int resultCount = 5;
 
         // 1️⃣ MongoDB 텍스트 인덱스 검색
         Query query = new Query();
@@ -104,8 +109,36 @@ public class NewsSearchService implements InternetSearchService {
             resultData = resultData.subList(0, resultCount);
         }
 
+        // 3.1. 레퍼런스 뉴스 탐색 및 크로마 DB 저장
+        List<ReferenceNewsArticle> referenceNewsList = referenceNewsCustomRepository.findNewsByKeywords(keywords);
+
+
+        // 3.2. 레퍼런스 뉴스 임베딩 저장 (비동기 병렬 처리)
+        ExecutorService executor_reference = Executors.newFixedThreadPool(20); // 병렬 처리 스레드 수 설정
+
+        List<CompletableFuture<Void>> futures_reference = referenceNewsList.stream()
+                .map(referenceNews -> CompletableFuture.runAsync(() -> {
+                    embeddingStorageService.storeReferenceNews(
+                            EmbeddingStorageService.EmbeddingRequest.builder()
+                                    .id(referenceNews.getId())
+                                    .title(referenceNews.getTitle())
+                                    .content(referenceNews.getContent())
+                                    .paragraphs(referenceNews.getParagraphs())
+                                    .pubDate(referenceNews.getPubDate())
+                                    .build()
+                    );
+                    System.out.println("referenceNews 임베딩 저장 완료: " + referenceNews.getId());
+                }, executor_reference))
+                .toList();
+
+        // 모든 작업 완료 대기
+        CompletableFuture.allOf(futures_reference.toArray(new CompletableFuture[0])).join();
+
+        executor_reference.shutdown();
+
+
         // 3️⃣ 병렬 처리로 크로마DB 저장 및 신뢰도 분석 수행
-        ExecutorService executor = Executors.newFixedThreadPool(5);
+        ExecutorService executor = Executors.newFixedThreadPool(30);
 
         List<CompletableFuture<NewsResponseDto>> futures = resultData.stream()
                 .map(dto -> CompletableFuture.supplyAsync(() -> {
@@ -122,13 +155,15 @@ public class NewsSearchService implements InternetSearchService {
                                     .pubDate(dto.getPubDate())
                                     .build()
                     );
+                    System.out.println("News 임베딩 저장 완료: " + newsId);
 
                     // 5️⃣ 신뢰도 분석 수행
-                    BiasAnalysisResult analysisResult = biasAnalyseService.analyzeBias(
+                    BiasAnalysisResult analysisResult = biasAnalyseService.analyzeBiasWithReference(
                             dto.getId(),
                             dto.getTitle(),
                             dto.getContent(),
-                            dto.getParagraphs()
+                            dto.getParagraphs(),
+                            referenceNewsList
                     );
 
                     dto.setBiasScore(analysisResult.getBiasScore());
@@ -193,7 +228,7 @@ public class NewsSearchService implements InternetSearchService {
                     .build();
 
             // 4️⃣ 크로마 DB 저장 & 신뢰도 분석 병렬 실행
-            ExecutorService executor = Executors.newFixedThreadPool(2);
+            ExecutorService executor = Executors.newFixedThreadPool(20);
 
             CompletableFuture<Void> embeddingFuture = CompletableFuture.runAsync(() ->
                     embeddingStorageService.storeNews(

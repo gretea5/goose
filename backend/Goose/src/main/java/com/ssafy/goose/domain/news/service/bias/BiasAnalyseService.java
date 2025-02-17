@@ -1,20 +1,13 @@
 package com.ssafy.goose.domain.news.service.bias;
 
-import com.ssafy.goose.domain.contentsearch.dto.KeywordResponseDto;
-import com.ssafy.goose.domain.contentsearch.service.KeywordService;
 import com.ssafy.goose.domain.news.entity.ReferenceNewsArticle;
 import com.ssafy.goose.domain.news.repository.ReferenceNewsCustomRepository;
 import com.ssafy.goose.domain.news.service.EmbeddingStorageService;
-import com.ssafy.goose.domain.news.service.keyword.TitleKeywordExtractor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.*;
 
 @Service
@@ -85,6 +78,45 @@ public class BiasAnalyseService {
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
         executor.shutdown();
+
+        try {
+            // 4, 5, 6 병렬 실행
+            CompletableFuture<Double> titleFuture = CompletableFuture.supplyAsync(
+                    () -> analyseByTitle.checkTitleWithReference(id, referenceNewsList), executorService
+            );
+
+            CompletableFuture<Double> contentFuture = CompletableFuture.supplyAsync(
+                    () -> analyseByContent.checkContentWithReference(id, referenceNewsList), executorService
+            );
+
+            CompletableFuture<ParagraphAnalysisResult> paragraphFuture = CompletableFuture.supplyAsync(
+                    () -> analyzeParagraph.analyze(title, paragraphs), executorService
+            );
+
+            // ✅ 병렬 작업 완료 대기
+            Double bias_title = titleFuture.get();  // 블로킹 (결과 기다림)
+            Double bias_content = contentFuture.get();
+            ParagraphAnalysisResult paragraphAnalysisResult = paragraphFuture.get();
+
+            Double paragraph_reliability = paragraphAnalysisResult.getAverageReliability();
+
+            double finalScore = (bias_title + bias_content + paragraph_reliability) / 3;
+
+            return BiasAnalysisResult.builder()
+                    .biasScore(finalScore)
+                    .reliability(finalScore)
+                    .paragraphReliabilities(paragraphAnalysisResult.getReliabilityScores())
+                    .paragraphReasons(paragraphAnalysisResult.getBestMatches())
+                    .build();
+
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Bias analysis failed", e);
+        }
+    }
+
+    public BiasAnalysisResult analyzeBiasWithReference(String id, String title, String content, List<String> paragraphs, List<ReferenceNewsArticle> referenceNewsList) {
+        System.out.println("analyzeBias 수행, title : " + title);
 
         try {
             // 4, 5, 6 병렬 실행

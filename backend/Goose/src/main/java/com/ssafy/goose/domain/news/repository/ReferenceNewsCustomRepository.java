@@ -62,4 +62,42 @@ public class ReferenceNewsCustomRepository {
 
         return mongoData;
     }
+
+    // 키워드 3개를 인자로 받는 버전
+    public List<ReferenceNewsArticle> findNewsByKeywords(String[] keywords) {
+
+        System.out.println("레퍼런스 뉴스 키워드 : " + String.join(", ", keywords));
+
+        // ✅ 검색 쿼리 설정
+        Query query = new Query();
+
+        // ✅ 여러 키워드를 공백으로 결합해 텍스트 검색에 활용
+        String searchQuery = String.join(" ", keywords);
+
+        // ✅ 3일 이내 뉴스만 검색 (pubDate가 String이면 비교를 위해 LocalDateTime 변환 필요)
+        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
+
+        // pubDate를 LocalDateTime으로 파싱하는 방식 (예: "2024-02-16T12:34:56")
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+        query.addCriteria(
+                new Criteria().andOperator(
+                        Criteria.where("$text").is(new org.bson.Document("$search", searchQuery)),
+                        Criteria.where("pubDate").gte(threeDaysAgo.format(formatter))
+                )
+        );
+
+        // ✅ 점수 기준 정렬 (검색 연관도 높은 순서)
+        query.with(Sort.by(Sort.Order.desc("score")));
+
+        // ✅ 최대 5개 제한
+        query.limit(5);
+
+        // ✅ 데이터 조회
+        List<ReferenceNewsArticle> mongoData = mongoTemplate.find(query, ReferenceNewsArticle.class, "reference_news");
+
+        System.out.println("🔍 MongoDB에서 검색된 데이터: " + mongoData.size() + "개");
+
+        return mongoData;
+    }
 }

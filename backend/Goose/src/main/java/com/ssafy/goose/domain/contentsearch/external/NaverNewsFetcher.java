@@ -7,17 +7,20 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.http.*;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Component
@@ -37,23 +40,29 @@ public class NaverNewsFetcher {
     private final NewsParagraphSplitService newsParagraphSplitService;
 
     public List<NewsResponseDto> fetchNaverNews(String[] keywords) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Naver-Client-Id", clientId);
-        headers.set("X-Naver-Client-Secret", clientSecret);
+        WebClient webClient = WebClient.builder()
+                .baseUrl(NAVER_NEWS_URL)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader("X-Naver-Client-Id", clientId)
+                .defaultHeader("X-Naver-Client-Secret", clientSecret)
+                .build();
 
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<String> response = restTemplate.exchange(
-                NAVER_NEWS_URL + String.join(" ", keywords) + "&display=20",
-                HttpMethod.GET,
-                entity,
-                String.class
-        );
+        String query = String.join(" ", keywords);
+        String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
 
-        JSONObject jsonResponse = new JSONObject(response.getBody());
+        String responseBody = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("query", encodedQuery)
+                        .queryParam("display", 20)
+                        .build()
+                )
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+        JSONObject jsonResponse = new JSONObject(responseBody);
         JSONArray items = jsonResponse.getJSONArray("items");
-
-        ExecutorService executor = Executors.newFixedThreadPool(30);
+        System.out.println("네이버 뉴스 1차 검색 결과 수 : " + items.length());
 
         List<CompletableFuture<NewsResponseDto>> futures = IntStream.range(0, items.length())
                 .mapToObj(i -> CompletableFuture.supplyAsync(() -> {
@@ -97,16 +106,15 @@ public class NaverNewsFetcher {
                         e.printStackTrace();
                         return null;
                     }
-                }, executor))
-                .toList();
+                }))
+                .collect(Collectors.toList());
 
         List<NewsResponseDto> newsList = futures.stream()
                 .map(CompletableFuture::join)
                 .filter(dto -> dto != null)
-                .toList();
+                .collect(Collectors.toList());
 
-        executor.shutdown();
-
+        System.out.println("네이버로부터 검색 완료, 갯수 : " + newsList.size());
         return newsList;
     }
 }

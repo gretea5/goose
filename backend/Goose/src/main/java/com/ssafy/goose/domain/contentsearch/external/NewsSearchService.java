@@ -73,6 +73,7 @@ public class NewsSearchService implements InternetSearchService {
 
     @Override
     public List<NewsResponseDto> search(String[] keywords) {
+        long startTime = System.currentTimeMillis(); // ⏱️ 시작 시간 측정
         // 반환할 뉴스 개수 설정
         int resultCount = 5;
 
@@ -82,12 +83,23 @@ public class NewsSearchService implements InternetSearchService {
         query.addCriteria(Criteria.where("$text").is(new org.bson.Document("$search", searchQuery)));
         query.with(Sort.by(Sort.Order.desc("score")));
         query.limit(resultCount);
+        // ✅ 각 키워드가 내용(content)에 모두 포함되는지 검사
+//        List<Criteria> keywordCriteria = new ArrayList<>();
+//        for (String keyword : keywords) {
+//            keywordCriteria.add(Criteria.where("content").regex(".*" + keyword + ".*"));
+//        }
+//
+//        query.addCriteria(new Criteria().andOperator(keywordCriteria));
+//        query.with(Sort.by(Sort.Order.desc("pubDate"))); // 최근 뉴스 우선
+//        query.limit(resultCount);
 
         // ✅ MongoDB 실행
         List<NewsResponseDto> mongoData = mongoTemplate.find(query, NewsResponseDto.class, "news_articles");
 
-        int mongoDataSize = mongoData.size();
-        int neededFromNaver = resultCount - mongoDataSize;
+//        int mongoDataSize = mongoData.size();
+//        int neededFromNaver = resultCount - mongoDataSize;
+        int neededFromNaver = 5;
+        int mongoDataSize = 0;
 
         // 2️⃣ MongoDB 데이터 부족 시 Naver API 호출
         List<NewsResponseDto> resultData = new ArrayList<>(mongoData);
@@ -149,6 +161,11 @@ public class NewsSearchService implements InternetSearchService {
 
         // ✅ 스레드풀 종료
         executor.shutdown();
+
+        // ⏱️ 종료 시간 및 수행 시간 출력
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+        System.out.println("🕒 search() 실행 시간: " + duration + "ms");
 
         return processedData;
     }

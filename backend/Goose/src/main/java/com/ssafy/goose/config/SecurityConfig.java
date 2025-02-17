@@ -41,7 +41,10 @@ public class SecurityConfig {
                                 "/api/users/**",
                                 "/api/news/**",
                                 "/api/content/**",
-                                "/api/warnings/**"
+                                "/api/warnings/**",
+                                "/api/game-result/**",
+                                "/api/fake-news/**",
+                                "/api/statistics/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

@@ -29,7 +29,7 @@ public class AnalyseByContent {
         }
 
         // ✅ 병렬 처리를 위한 ExecutorService 생성 (스레드풀)
-        ExecutorService executor = Executors.newFixedThreadPool(5); // 적절히 조절 가능
+        ExecutorService executor = Executors.newFixedThreadPool(20); // 적절히 조절 가능
 
         try {
             // ✅ 비동기 작업 생성

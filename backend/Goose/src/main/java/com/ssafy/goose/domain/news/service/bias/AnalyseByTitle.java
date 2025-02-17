@@ -26,7 +26,7 @@ public class AnalyseByTitle {
             int totalArticles = referenceNewsList.size();
             if (totalArticles == 0) return 0.0;
 
-            ExecutorService executor = Executors.newFixedThreadPool(5); // 스레드풀 생성 (적절히 조절)
+            ExecutorService executor = Executors.newFixedThreadPool(20); // 스레드풀 생성 (적절히 조절)
 
             List<CompletableFuture<Double>> futures = referenceNewsList.stream()
                     .map(referenceNews -> CompletableFuture.supplyAsync(() -> {

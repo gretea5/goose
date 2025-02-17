@@ -53,7 +53,7 @@ public class NaverNewsFetcher {
         JSONObject jsonResponse = new JSONObject(response.getBody());
         JSONArray items = jsonResponse.getJSONArray("items");
 
-        ExecutorService executor = Executors.newFixedThreadPool(5);
+        ExecutorService executor = Executors.newFixedThreadPool(30);
 
         List<CompletableFuture<NewsResponseDto>> futures = IntStream.range(0, items.length())
                 .mapToObj(i -> CompletableFuture.supplyAsync(() -> {

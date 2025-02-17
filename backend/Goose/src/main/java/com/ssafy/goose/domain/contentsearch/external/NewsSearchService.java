@@ -83,15 +83,6 @@ public class NewsSearchService implements InternetSearchService {
         query.addCriteria(Criteria.where("$text").is(new org.bson.Document("$search", searchQuery)));
         query.with(Sort.by(Sort.Order.desc("score")));
         query.limit(resultCount);
-        // ✅ 각 키워드가 내용(content)에 모두 포함되는지 검사
-//        List<Criteria> keywordCriteria = new ArrayList<>();
-//        for (String keyword : keywords) {
-//            keywordCriteria.add(Criteria.where("content").regex(".*" + keyword + ".*"));
-//        }
-//
-//        query.addCriteria(new Criteria().andOperator(keywordCriteria));
-//        query.with(Sort.by(Sort.Order.desc("pubDate"))); // 최근 뉴스 우선
-//        query.limit(resultCount);
 
         // ✅ MongoDB 실행
         List<NewsResponseDto> mongoData = mongoTemplate.find(query, NewsResponseDto.class, "news_articles");

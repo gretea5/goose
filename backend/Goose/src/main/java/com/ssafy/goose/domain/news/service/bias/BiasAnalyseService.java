@@ -4,13 +4,15 @@ import com.ssafy.goose.domain.news.entity.ReferenceNewsArticle;
 import com.ssafy.goose.domain.news.repository.ReferenceNewsCustomRepository;
 import com.ssafy.goose.domain.news.service.EmbeddingStorageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.*;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +24,9 @@ public class BiasAnalyseService {
     private final AnalyzeParagraph analyzeParagraph;
     private final EmbeddingStorageService embeddingStorageService;
 
+    private final RestTemplate restTemplate = new RestTemplate(); // ✅ 추가됨
+
+    // ✅ 병렬 처리 스레드풀 설정
     private final ExecutorService executorService = new ThreadPoolExecutor(
             5, 10, 30L, TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(100),
@@ -42,7 +47,7 @@ public class BiasAnalyseService {
                     .build();
         }
 
-        // 비동기 병렬 임베딩 저장
+        // ✅ 레퍼런스 뉴스 임베딩 저장 - 비동기 병렬 처리
         ExecutorService executor = Executors.newFixedThreadPool(20);
         List<CompletableFuture<Void>> futures = referenceNewsList.stream()
                 .map(referenceNews -> CompletableFuture.runAsync(() -> {
@@ -62,12 +67,14 @@ public class BiasAnalyseService {
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         executor.shutdown();
 
-        // 분석 실행 (레퍼런스 뉴스 ID 넘기기)
+        // ✅ 임베딩 저장 후 분석 실행 (referenceNewsList 함께 전달)
         return analyzeBiasWithReference(id, title, content, paragraphs, referenceNewsList);
     }
 
-    public BiasAnalysisResult analyzeBiasWithReference(String id, String title, String content, List<String> paragraphs, List<ReferenceNewsArticle> referenceNewsList) {
-        System.out.println("analyzeBiasWithReference 수행, title : " + title);
+    public BiasAnalysisResult analyzeBiasWithReference(
+            String id, String title, String content, List<String> paragraphs, List<ReferenceNewsArticle> referenceNewsList) {
+
+        System.out.println("analyzeBiasWithReference 수행 (본문 기반 유사도 검색), title : " + title);
 
         try {
             CompletableFuture<Double> titleFuture = CompletableFuture.supplyAsync(
@@ -78,10 +85,26 @@ public class BiasAnalyseService {
                     () -> analyseByContent.checkContentWithReference(id, referenceNewsList), executorService
             );
 
-            List<String> referenceParagraphIds = referenceNewsList.stream()
-                    .flatMap(ref -> IntStream.range(0, ref.getParagraphs().size())
-                            .mapToObj(i -> ref.getId() + "_p_" + i))
-                    .collect(Collectors.toList());
+            CompletableFuture<List<String>> similarReferenceIdsFuture = CompletableFuture.supplyAsync(() -> {
+                // ✅ FastAPI 호출 → 본문(content) 임베딩 → 유사 reference_id 5개 가져오기
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+
+                Map<String, String> requestBody = Map.of("query", content, "n_results", "5");
+
+                HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+                ResponseEntity<Map> response = restTemplate.postForEntity(
+                        "http://localhost:5061/get-similar-references",
+                        requestEntity,
+                        Map.class
+                );
+
+                List<String> referenceIds = (List<String>) response.getBody().get("reference_ids");
+                return referenceIds;
+            }, executorService);
+
+            List<String> referenceParagraphIds = similarReferenceIdsFuture.get();
 
             CompletableFuture<ParagraphAnalysisResult> paragraphFuture = CompletableFuture.supplyAsync(
                     () -> analyzeParagraph.analyze(title, paragraphs, referenceParagraphIds),

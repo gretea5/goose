@@ -105,3 +105,26 @@ async def analyze_news_reliability(request: NewsReliabilityRequest):
         "paragraph_reliability_scores": reliability_scores,
         "best_evidence_paragraphs": best_evidence_paragraphs
     }
+
+@app.post("/get-similar-references")
+async def get_similar_references(request: dict):
+    query = request.get("query")
+    n_results = int(request.get("n_results", 5))
+
+    if not query:
+        raise HTTPException(status_code=400, detail="Query text is required")
+
+    query_embedding = bert_model.encode([query])[0]
+
+    result = reference_paragraph_collection.query(
+        query_embeddings=[query_embedding.tolist()],
+        n_results=n_results,
+        include=["documents", "distances"]  # "ids" 제거!
+    )
+
+
+    if not result or "ids" not in result or not result["ids"]:
+        return {"reference_ids": []}
+
+    reference_ids = result["ids"][0]
+    return {"reference_ids": reference_ids}

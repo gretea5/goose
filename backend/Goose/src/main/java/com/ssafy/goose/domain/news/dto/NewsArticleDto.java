@@ -33,7 +33,7 @@ public class NewsArticleDto {
     private Double reliability;
     private Double aiRate;          // ✅ 추가: AI 종합 평가 점수
     private String newsAgency;      // ✅ 추가: 언론사 정보 필드
-    private String reliabilityComment; // ✅ 추가: 신뢰도 평가 코멘트 (ex. "신뢰성 있는 기사입니다.")
+    private String evaluationMessage; // ✅ 추가: 신뢰도 평가 코멘트 (ex. "신뢰성 있는 기사입니다.")
 
     /**
      * 🔹 엔티티 → DTO 변환
@@ -60,7 +60,7 @@ public class NewsArticleDto {
                 .paragraphReasons(article.getParagraphReasons())
                 .aiRate(article.getAiRate() != null ? article.getAiRate() : 0.0)
                 .newsAgency(article.getNewsAgency())
-                .reliabilityComment(generateReliabilityComment(
+                .evaluationMessage(generateEvaluationMessage(
                         article.getReliability() != null ? article.getReliability() : 50.0,
                         article.getBiasScore() != null ? article.getBiasScore() : 0.0
                 ))
@@ -113,7 +113,7 @@ public class NewsArticleDto {
     /**
      * 🔹 신뢰도 및 편향성 점수 기반 코멘트 생성 메서드
      */
-    public static String generateReliabilityComment(Double reliability, Double biasScore) {
+    public static String generateEvaluationMessage(Double reliability, Double biasScore) {
         if (reliability == null) reliability = 50.0;
         if (biasScore == null) biasScore = 0.0;
 

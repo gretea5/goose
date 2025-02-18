@@ -9,7 +9,7 @@ from chromadb.config import Settings
 import numpy as np
 
 # 환경변수 또는 기본값으로 MongoDB 연결 정보 설정
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb://d208:rnal2qksghkdlxld!@i12d208.p.ssafy.io:27017/goose?authSource=goose")
+MONGO_URI = os.environ.get("MONGO_URI")
 DATABASE_NAME = "goose"
 # MongoDB 컬렉션 이름들
 REFERENCE_NEWS_COLLECTION_NAME = "reference_news"
@@ -65,7 +65,7 @@ def update_reference_news_embeddings():
                 "type": "paragraph"
             }
             try:
-                reference_news_chroma_collection_paragraphs.add(
+                reference_news_chroma_collection_paragraphs.upsert(
                     ids=[doc_id],
                     documents=[paragraph],
                     embeddings=[embedding],
@@ -86,7 +86,7 @@ def update_reference_news_embeddings():
                 "type": "full_content"
             }
             try:
-                reference_news_chroma_collection_content.add(
+                reference_news_chroma_collection_content.upsert(
                     ids=[doc_id],
                     documents=[content_text],
                     embeddings=[embedding],
@@ -115,7 +115,7 @@ def update_news_articles_embeddings():
                 "type": "title"
             }
             try:
-                news_articles_chroma_collection_title.add(
+                news_articles_chroma_collection_title.upsert(
                     ids=[doc_id],
                     documents=[title],
                     embeddings=[embedding],
@@ -136,7 +136,7 @@ def update_news_articles_embeddings():
                 "type": "content"
             }
             try:
-                news_articles_chroma_collection_content.add(
+                news_articles_chroma_collection_content.upsert(
                     ids=[doc_id],
                     documents=[content_text],
                     embeddings=[embedding],
@@ -157,7 +157,7 @@ def update_news_articles_embeddings():
                 "type": "paragraph"
             }
             try:
-                news_articles_chroma_collection_paragraphs.add(
+                news_articles_chroma_collection_paragraphs.upsert(
                     ids=[doc_id],
                     documents=[paragraph],
                     embeddings=[embedding],

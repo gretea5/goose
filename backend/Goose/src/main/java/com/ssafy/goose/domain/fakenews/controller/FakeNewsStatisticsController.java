@@ -144,7 +144,8 @@ public class FakeNewsStatisticsController {
         }
         int totalQuestions = results.size();
         int correctCount = (int) results.stream().filter(FakeNewsGameResult::getCorrect).count();
-        double correctRate = totalQuestions > 0 ? ((double) correctCount / totalQuestions) * 100 : 0;
+        double correctRateRaw = totalQuestions > 0 ? ((double) correctCount / totalQuestions) * 100 : 0;
+        double correctRateRounded = Math.round(correctRateRaw * 10) / 10.0;
         List<MyPageStatisticsDTO.GameRecordDTO> records = results.stream().map(r -> {
             MyPageStatisticsDTO.GameRecordDTO rec = new MyPageStatisticsDTO.GameRecordDTO();
             rec.setSolvedAt(r.getSolvedAt());
@@ -155,7 +156,7 @@ public class FakeNewsStatisticsController {
         dto.setNickname(nickname);
         dto.setTotalQuestions(totalQuestions);
         dto.setCorrectCount(correctCount);
-        dto.setCorrectRate(correctRate);
+        dto.setCorrectRate(correctRateRounded);
         dto.setGameRecords(records);
         return ResponseEntity.ok(dto);
     }

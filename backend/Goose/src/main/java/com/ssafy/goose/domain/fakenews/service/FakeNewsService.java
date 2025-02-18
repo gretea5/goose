@@ -59,7 +59,10 @@ public class FakeNewsService {
         int totalVotes = votes.values().stream().mapToInt(Integer::intValue).sum();
         Map<String, Double> percentages = new HashMap<>();
         for (Map.Entry<String, Integer> entry : votes.entrySet()) {
-            percentages.put(entry.getKey(), (entry.getValue() * 100.0) / totalVotes);
+            double value = (entry.getValue() * 100.0) / totalVotes;
+            // 소수점 첫째자리 반올림
+            double roundedValue = Math.round(value * 10) / 10.0;
+            percentages.put(entry.getKey(), roundedValue);
         }
         news.setSelectionPercentages(percentages);
 

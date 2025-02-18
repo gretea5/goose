@@ -131,7 +131,15 @@ public class FakeNewsStatisticsController {
         NewsStatisticsDto dto = new NewsStatisticsDto();
         dto.setCorrectAnswer(news.getCorrectAnswer());
         dto.setFakeReason(news.getFakeReason());
-        dto.setSelectionPercentages(news.getSelectionPercentages());
+
+        // 소수점 첫째 자리 반올림 적용
+        Map<String, Double> roundedPercentages = new HashMap<>();
+        for (Map.Entry<String, Double> entry : news.getSelectionPercentages().entrySet()) {
+            double roundedValue = Math.round(entry.getValue() * 10) / 10.0;
+            roundedPercentages.put(entry.getKey(), roundedValue);
+        }
+        dto.setSelectionPercentages(roundedPercentages);
+
         return ResponseEntity.ok(dto);
     }
 

@@ -100,6 +100,7 @@ public class FakeNewsGameResultController {
         responseDto.setNewsId(savedResult.getNewsId());
         responseDto.setUserChoice(savedResult.getUserChoice());
         responseDto.setCorrect(savedResult.getCorrect());
+        responseDto.setCorrectAnswer(news.getCorrectAnswer());
         responseDto.setDwellTime(savedResult.getDwellTime());
         responseDto.setSolvedAt(savedResult.getSolvedAt());
 

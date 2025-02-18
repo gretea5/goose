@@ -4,6 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class MyPageStatisticsRequestDTO {
+public class MyPageStatisticsRequestDto {
     private String newsId;
 }

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from fastapi import FastAPI
+from fastapi import HTTPException
 from pydantic import BaseModel
 from typing import List
 import openai

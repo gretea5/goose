@@ -87,10 +87,10 @@ public class NewsSearchService implements InternetSearchService {
         // ✅ MongoDB 실행
         List<NewsResponseDto> mongoData = mongoTemplate.find(query, NewsResponseDto.class, "news_articles");
 
-//        int mongoDataSize = mongoData.size();
-//        int neededFromNaver = resultCount - mongoDataSize;
-        int neededFromNaver = 5;
-        int mongoDataSize = 0;
+        int mongoDataSize = mongoData.size();
+        int neededFromNaver = resultCount - mongoDataSize;
+//        int neededFromNaver = 5;
+//        int mongoDataSize = 0;
 
         // 2️⃣ MongoDB 데이터 부족 시 Naver API 호출
         List<NewsResponseDto> resultData = new ArrayList<>(mongoData);

@@ -4,7 +4,10 @@ import com.ssafy.goose.domain.news.entity.ReferenceNewsArticle;
 import com.ssafy.goose.domain.news.repository.ReferenceNewsCustomRepository;
 import com.ssafy.goose.domain.news.service.EmbeddingStorageService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -12,7 +15,6 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -95,7 +97,7 @@ public class BiasAnalyseService {
                 HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
 
                 ResponseEntity<Map> response = restTemplate.postForEntity(
-                        "http://localhost:5061/get-similar-references",
+                        "http://i12d208.p.ssafy.io/:5061/get-similar-references",
                         requestEntity,
                         Map.class
                 );

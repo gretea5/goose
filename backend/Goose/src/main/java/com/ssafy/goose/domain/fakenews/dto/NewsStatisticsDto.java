@@ -6,7 +6,7 @@ import lombok.Setter;
 import java.util.Map;
 
 @Getter @Setter
-public class NewsStatisticsDTO {
+public class NewsStatisticsDto {
 
     private String correctAnswer;                     // 해당 뉴스 게임의 정답
     private String fakeReason;                        // 정답인 이유

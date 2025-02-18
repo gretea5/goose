@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter @Setter
-public class MyPageStatisticsDTO {
+public class MyPageStatisticsDto {
 
     private String nickname;                 // 닉네임
     private int totalQuestions;              // 전체 게임 횟수

@@ -11,6 +11,7 @@ public class FakeNewsGameResultResponseDto {
     private String newsId;
     private String userChoice;
     private Boolean correct;
+    private String correctAnswer;
     private Long dwellTime;
     private LocalDateTime solvedAt;
 }

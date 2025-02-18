@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter @Setter
-public class UserGameResultDTO {
+public class UserGameResultDto {
 
     private String userChoice;            // 사용자가 선택한 답
     private Boolean correct;              // 정답 여부

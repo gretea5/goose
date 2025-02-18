@@ -19,21 +19,22 @@ import java.util.Locale;
 @AllArgsConstructor
 public class NewsResponseDto {
 
-    private String id;                           // MongoDB 자동 생성 ID
-    private String title;                        // 제목
-    private String originalLink;                 // 원본 링크
-    private String naverLink;                    // 네이버 링크
-    private String description;                  // 요약
-    private String pubDate;                      // 게시 날짜
-    private String content;                      // 본문 내용
-    private List<String> paragraphs;             // 뉴스 본문에 포함된 주요 문단들
-    private List<Double> paragraphReliabilities; // 문단별 신뢰도 점수
-    private List<String> paragraphReasons;       // 문단별 신뢰도 분석 결과(사유)
-    private String topImage;                     // 대표 이미지 URL
-    private LocalDateTime extractedAt;           // 추출 시간
-    private Double biasScore;                    // 편향성 점수
-    private Double reliability;                  // 기사 신뢰도 점수
-    private String newsAgency;                   // 언론사 정보 추가
+    private String id;
+    private String title;
+    private String originalLink;
+    private String naverLink;
+    private String description;
+    private String pubDate;
+    private String content;
+    private List<String> paragraphs;
+    private List<Double> paragraphReliabilities;
+    private List<String> paragraphReasons;
+    private String topImage;
+    private LocalDateTime extractedAt;
+    private Double biasScore;
+    private Double reliability;
+    private String newsAgency;
+    private Double aiRate; // AI 평가 점수 필드 추가
 
     @Override
     public String toString() {
@@ -53,9 +54,9 @@ public class NewsResponseDto {
                 ", biasScore=" + biasScore +
                 ", reliability=" + reliability +
                 ", newsAgency='" + newsAgency + '\'' +
+                ", aiRate=" + aiRate +
                 '}';
     }
-
 
     public long getPubDateTimestamp() {
         try {
@@ -70,6 +71,22 @@ public class NewsResponseDto {
             } catch (Exception ex) {
                 return -1;
             }
+        }
+    }
+
+    public String getEvaluationMessage() {
+        if (biasScore != null && reliability != null) {
+            if (biasScore < 40 && reliability > 70) {
+                return "해당 기사는 편향되지 않은 정보를 담고 있으며 과장된 내용이 포함되지 않은 신뢰성 있는 기사입니다.";
+            } else if (biasScore >= 40 && biasScore < 60 && reliability > 50) {
+                return "해당 기사는 중립적이나 일부 편향된 내용이 포함될 수 있습니다.";
+            } else if (biasScore >= 60 || reliability < 50) {
+                return "해당 기사는 다소 편향적인 내용이 포함되어 있으며 신뢰성에 주의가 필요합니다.";
+            } else {
+                return "해당 기사의 신뢰성 및 편향성에 대한 평가가 명확하지 않습니다.";
+            }
+        } else {
+            return "기사 분석 데이터가 부족하여 평가를 제공할 수 없습니다.";
         }
     }
 }

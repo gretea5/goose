@@ -33,6 +33,8 @@ public class NewsAnalysis {
     private Double reliability;
     private List<Double> paragraphReliabilities;
     private List<String> paragraphReasons;
+    private Double aiRate;
+    private String evaluationMessage;            // AI 평가 문구
 
     // 추가 필드: 분석 요청 시각, 분석 종류, 사용자 로그인 ID
     private LocalDateTime analysisRequestedAt;   // 분석 요청 시각 (타임스탬프)

@@ -9,7 +9,7 @@ import java.util.List;
 @Getter @Setter
 public class MyPageStatisticsDTO {
 
-    private String username;                 // 로그인 ID
+    private String nickname;                 // 닉네임
     private int totalQuestions;              // 전체 게임 횟수
     private int correctCount;                // 맞춘 게임 개수
     private double correctRate;              // 정답률 (정답 수 / 전체 게임 수 * 100)

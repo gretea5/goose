@@ -19,18 +19,15 @@ public class FakeNewsGameResultService {
 
     // 게임 결과를 저장하고 반환
     public FakeNewsGameResult saveGameResult(String username, String newsId, String userChoice,
-                                             Boolean correct, long dwellTime, int totalQuestions, int correctCount) {
+                                             Boolean correct, long dwellTime) {
         FakeNewsGameResult result = new FakeNewsGameResult();
         result.setUsername(username);
         result.setNewsId(newsId);
         result.setUserChoice(userChoice);
         result.setCorrect(correct);
         result.setDwellTime(dwellTime);
-        result.setTotalQuestions(totalQuestions);
-        result.setCorrectCount(correctCount);
         result.setSolvedAt(LocalDateTime.now());
         gameResultRepository.save(result);
-
         return result;
     }
 }

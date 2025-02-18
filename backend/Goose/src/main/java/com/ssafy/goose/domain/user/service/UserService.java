@@ -49,7 +49,8 @@ public class UserService {
                 .build();
 
         userRepository.save(user);
-        return UserResponseDto.success();
+        // 회원가입 성공 시, 토큰 없이 닉네임만 반환합니다.
+        return UserResponseDto.success(user.getNickname());
     }
 
     // 로그인
@@ -82,7 +83,8 @@ public class UserService {
         user.setToken(null);
         userRepository.save(user);
 
-        return UserResponseDto.success();
+        // 로그아웃 성공 시, 닉네임을 반환합니다.
+        return UserResponseDto.success(user.getNickname());
     }
 
     // RefreshToken을 사용한 AccessToken 재발급
@@ -106,9 +108,10 @@ public class UserService {
 
     // ✅ AccessToken & RefreshToken을 생성하는 공통 메서드
     private UserResponseDto generateNewTokens(User user) {
-        String accessToken = jwtTokenProvider.createAccessToken(user.getUsername());
+        // createAccessToken() 메서드는 이제 username과 nickname을 모두 받아 토큰에 클레임으로 저장합니다.
+        String accessToken = jwtTokenProvider.createAccessToken(user.getUsername(), user.getNickname());
 
-        // 기존 RefreshToken이 유효한 경우 유지, 아니면 새로 발급
+        // 기존 RefreshToken 유지, 없으면 새로 발급
         String refreshToken = user.getToken();
         if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
             refreshToken = jwtTokenProvider.createRefreshToken(user.getUsername());
@@ -116,7 +119,7 @@ public class UserService {
             userRepository.save(user);
         }
 
-        return UserResponseDto.success(accessToken, refreshToken);
+        return UserResponseDto.success(accessToken, refreshToken, null);
     }
 
     // 회원 가입 시 ID 중복 체크

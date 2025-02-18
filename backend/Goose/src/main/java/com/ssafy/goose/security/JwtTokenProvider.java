@@ -23,12 +23,22 @@ public class JwtTokenProvider {
         this.refreshTokenValidity = refreshValidity;
     }
 
-    // AccessToken 생성
-    public String createAccessToken(String username) {
-        return createToken(username, accessTokenValidity);
+    // AccessToken 생성 시 username과 함께 nickname 클레임 추가
+    public String createAccessToken(String username, String nickname) {
+        Claims claims = Jwts.claims().setSubject(username);
+        claims.put("nickname", nickname);  // 닉네임 추가
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + accessTokenValidity);
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
     }
 
-    // RefreshToken 생성
+    // RefreshToken 생성 (닉네임은 필요 없음)
     public String createRefreshToken(String username) {
         return createToken(username, refreshTokenValidity);
     }
@@ -37,7 +47,6 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims().setSubject(username);
         Date now = new Date();
         Date expiry = new Date(now.getTime() + validity);
-
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
@@ -54,6 +63,16 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    // 토큰에서 nickname 추출 (추가)
+    public String getNickname(String token) {
+        return (String) Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("nickname");
     }
 
     // 토큰 유효성 검증

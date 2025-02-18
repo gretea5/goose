@@ -7,10 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.http.*;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Component
@@ -30,33 +34,45 @@ public class NaverNewsFetcher {
     @Value("${naver.client-secret}")
     private String clientSecret;
 
-    private static final String NAVER_NEWS_URL = "https://openapi.naver.com/v1/search/news.json?query=";
+    private static final String NAVER_NEWS_URL = "https://openapi.naver.com/v1/search/news.json";
 
     private final NewsAgencyExtractor newsAgencyExtractor;
     private final NewsContentScraping newsContentScraping;
     private final NewsParagraphSplitService newsParagraphSplitService;
 
     public List<NewsResponseDto> fetchNaverNews(String[] keywords) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Naver-Client-Id", clientId);
-        headers.set("X-Naver-Client-Secret", clientSecret);
+        long totalStart = System.currentTimeMillis();
 
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<String> response = restTemplate.exchange(
-                NAVER_NEWS_URL + String.join(" ", keywords) + "&display=20",
-                HttpMethod.GET,
-                entity,
-                String.class
-        );
+        WebClient webClient = WebClient.builder()
+                .baseUrl(NAVER_NEWS_URL)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader("X-Naver-Client-Id", clientId)
+                .defaultHeader("X-Naver-Client-Secret", clientSecret)
+                .build();
 
-        JSONObject jsonResponse = new JSONObject(response.getBody());
+        String query = String.join(" ", keywords);
+
+        long apiStart = System.currentTimeMillis();
+        String responseBody = webClient.get()
+                .uri(uriBuilder -> {
+                    String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+                    return uriBuilder.queryParam("query", encodedQuery).queryParam("display", 20).build();
+                })
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+        long apiEnd = System.currentTimeMillis();
+        System.out.println("🔵 네이버 뉴스 API 요청 소요 시간: " + (apiEnd - apiStart) + "ms");
+
+        JSONObject jsonResponse = new JSONObject(responseBody);
         JSONArray items = jsonResponse.getJSONArray("items");
+        System.out.println("네이버 뉴스 1차 검색 결과 수 : " + items.length());
 
-        ExecutorService executor = Executors.newFixedThreadPool(30);
+        ExecutorService executor = Executors.newFixedThreadPool(20);
 
         List<CompletableFuture<NewsResponseDto>> futures = IntStream.range(0, items.length())
                 .mapToObj(i -> CompletableFuture.supplyAsync(() -> {
+                    long start = System.currentTimeMillis();
                     try {
                         JSONObject jsonObject = items.getJSONObject(i);
 
@@ -64,9 +80,16 @@ public class NaverNewsFetcher {
                         String naverLink = jsonObject.optString("link", "");
                         String pubDate = jsonObject.optString("pubDate", "");
 
+                        // 언론사 추출 시간 측정
+                        long agencyStart = System.currentTimeMillis();
                         String newsAgency = newsAgencyExtractor.extractNewsAgency(originalLink.isEmpty() ? naverLink : originalLink);
+                        long agencyEnd = System.currentTimeMillis();
 
+                        // 본문 크롤링 시간 측정
+                        long crawlingStart = System.currentTimeMillis();
                         Map<String, Object> scrapedData = newsContentScraping.extractArticle(naverLink);
+                        long crawlingEnd = System.currentTimeMillis();
+
                         if (scrapedData == null || !scrapedData.containsKey("text")) return null;
 
                         String cleanTitle = (String) scrapedData.get("title");
@@ -75,7 +98,18 @@ public class NaverNewsFetcher {
 
                         if (content.length() < 100) return null;
 
+                        // 문단 분리 시간 측정
+                        long splitStart = System.currentTimeMillis();
                         List<String> paragraphs = newsParagraphSplitService.getSplitParagraphs(content);
+                        long splitEnd = System.currentTimeMillis();
+
+                        long end = System.currentTimeMillis();
+
+                        System.out.println("🟢 뉴스 처리 완료 (" + cleanTitle + ")");
+                        System.out.println("  └ 언론사 추출: " + (agencyEnd - agencyStart) + "ms");
+                        System.out.println("  └ 본문 크롤링: " + (crawlingEnd - crawlingStart) + "ms");
+                        System.out.println("  └ 문단 분리: " + (splitEnd - splitStart) + "ms");
+                        System.out.println("  └ 전체 뉴스 처리: " + (end - start) + "ms");
 
                         return NewsResponseDto.builder()
                                 .id(null)
@@ -98,14 +132,18 @@ public class NaverNewsFetcher {
                         return null;
                     }
                 }, executor))
-                .toList();
+                .collect(Collectors.toList());
 
         List<NewsResponseDto> newsList = futures.stream()
                 .map(CompletableFuture::join)
                 .filter(dto -> dto != null)
-                .toList();
+                .collect(Collectors.toList());
 
         executor.shutdown();
+
+        long totalEnd = System.currentTimeMillis();
+        System.out.println("🟣 전체 fetchNaverNews 실행 시간: " + (totalEnd - totalStart) + "ms");
+        System.out.println("네이버로부터 검색 완료, 갯수 : " + newsList.size());
 
         return newsList;
     }

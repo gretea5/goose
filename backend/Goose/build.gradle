@@ -80,6 +80,8 @@ dependencies {
 	// ✅ Spring Boot Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+	// WebClient
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 tasks.named('test') {

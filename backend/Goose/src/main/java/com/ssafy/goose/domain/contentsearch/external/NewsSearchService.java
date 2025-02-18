@@ -73,29 +73,24 @@ public class NewsSearchService implements InternetSearchService {
 
     @Override
     public List<NewsResponseDto> search(String[] keywords) {
-        // 반환할 갯수
+        long startTime = System.currentTimeMillis(); // ⏱️ 시작 시간 측정
+        // 반환할 뉴스 개수 설정
         int resultCount = 5;
 
         // 1️⃣ MongoDB 텍스트 인덱스 검색
         Query query = new Query();
-
-        // ✅ 여러 키워드를 하나의 문자열로 합쳐서 "금리 인상 OR 환율" 이런식으로 검색 (OR 검색)
         String searchQuery = String.join(" ", keywords);
-
-        // ✅ $text 연산자 사용 -> 텍스트 인덱스 활용
         query.addCriteria(Criteria.where("$text").is(new org.bson.Document("$search", searchQuery)));
-
-        // ✅ 점수 기준 정렬 (검색 연관도 높은 순서)
         query.with(Sort.by(Sort.Order.desc("score")));
-
-        // ✅ 최대 5개 제한
         query.limit(resultCount);
 
         // ✅ MongoDB 실행
         List<NewsResponseDto> mongoData = mongoTemplate.find(query, NewsResponseDto.class, "news_articles");
 
-        int mongoDataSize = mongoData.size();
-        int neededFromNaver = resultCount - mongoDataSize;
+//        int mongoDataSize = mongoData.size();
+//        int neededFromNaver = resultCount - mongoDataSize;
+        int neededFromNaver = 5;
+        int mongoDataSize = 0;
 
         // 2️⃣ MongoDB 데이터 부족 시 Naver API 호출
         List<NewsResponseDto> resultData = new ArrayList<>(mongoData);
@@ -104,40 +99,15 @@ public class NewsSearchService implements InternetSearchService {
             resultData.addAll(naverData.subList(0, Math.min(neededFromNaver, naverData.size())));
         }
 
-        // 최대 5개까지만 사용
+        // ✅ 최대 resultCount(5개) 제한
         if (resultData.size() > resultCount) {
             resultData = resultData.subList(0, resultCount);
         }
 
-        // 3.1. 레퍼런스 뉴스 탐색 및 크로마 DB 저장
+        // 3️⃣ 레퍼런스 뉴스 탐색 (MongoDB에서 키워드 기반 검색)
         List<ReferenceNewsArticle> referenceNewsList = referenceNewsCustomRepository.findNewsByKeywords(keywords);
 
-
-        // 3.2. 레퍼런스 뉴스 임베딩 저장 (비동기 병렬 처리)
-        ExecutorService executor_reference = Executors.newFixedThreadPool(20); // 병렬 처리 스레드 수 설정
-
-        List<CompletableFuture<Void>> futures_reference = referenceNewsList.stream()
-                .map(referenceNews -> CompletableFuture.runAsync(() -> {
-                    embeddingStorageService.storeReferenceNews(
-                            EmbeddingStorageService.EmbeddingRequest.builder()
-                                    .id(referenceNews.getId())
-                                    .title(referenceNews.getTitle())
-                                    .content(referenceNews.getContent())
-                                    .paragraphs(referenceNews.getParagraphs())
-                                    .pubDate(referenceNews.getPubDate())
-                                    .build()
-                    );
-                    System.out.println("referenceNews 임베딩 저장 완료: " + referenceNews.getId());
-                }, executor_reference))
-                .toList();
-
-        // 모든 작업 완료 대기
-        CompletableFuture.allOf(futures_reference.toArray(new CompletableFuture[0])).join();
-
-        executor_reference.shutdown();
-
-
-        // 3️⃣ 병렬 처리로 크로마DB 저장 및 신뢰도 분석 수행
+        // 4️⃣ 병렬 처리로 크로마DB 저장 및 신뢰도 분석 수행
         ExecutorService executor = Executors.newFixedThreadPool(30);
 
         List<CompletableFuture<NewsResponseDto>> futures = resultData.stream()
@@ -145,7 +115,7 @@ public class NewsSearchService implements InternetSearchService {
                     String newsId = new ObjectId().toString();
                     dto.setId(newsId);
 
-                    // 4️⃣ 크로마DB 저장
+                    // ✅ 크로마DB 저장 (임베딩 저장)
                     embeddingStorageService.storeNews(
                             EmbeddingStorageService.EmbeddingRequest.builder()
                                     .id(newsId)
@@ -157,7 +127,7 @@ public class NewsSearchService implements InternetSearchService {
                     );
                     System.out.println("News 임베딩 저장 완료: " + newsId);
 
-                    // 5️⃣ 신뢰도 분석 수행
+                    // ✅ 신뢰도 분석 수행 (레퍼런스 뉴스와 비교)
                     BiasAnalysisResult analysisResult = biasAnalyseService.analyzeBiasWithReference(
                             dto.getId(),
                             dto.getTitle(),
@@ -175,13 +145,18 @@ public class NewsSearchService implements InternetSearchService {
                 }, executor))
                 .toList();
 
-        // 6️⃣ 모든 병렬 작업 완료 대기
+        // 5️⃣ 모든 병렬 작업 완료 대기
         List<NewsResponseDto> processedData = futures.stream()
                 .map(CompletableFuture::join)
                 .toList();
 
-        // 7️⃣ 스레드풀 종료
+        // ✅ 스레드풀 종료
         executor.shutdown();
+
+        // ⏱️ 종료 시간 및 수행 시간 출력
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+        System.out.println("🕒 search() 실행 시간: " + duration + "ms");
 
         return processedData;
     }

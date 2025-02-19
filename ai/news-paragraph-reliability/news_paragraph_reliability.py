@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-from fastapi import FastAPI
-from fastapi import HTTPException
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
-import openai
 import chromadb
 from sentence_transformers import SentenceTransformer
 import numpy as np
@@ -11,36 +9,39 @@ import torch
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-# OpenAI API Key 설정 (실제 키로 교체)
-openai.api_key = os.environ.get("OPENAI_API_KEY", "")
-
 app = FastAPI()
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# SentenceTransformer 모델 로드 (임베딩 계산용)
-bert_model = SentenceTransformer("all-MiniLM-L6-v2", device=device)
+# ✅ 더 강력한 모델 사용 (MPNet, 768차원)
+bert_model = SentenceTransformer("all-mpnet-base-v2", device=device)
 
-# ChromaDB 연결 정보 (뉴스 reference 문단 임베딩이 저장된 컬렉션)
+# ChromaDB 연결 정보
 CHROMA_HOST = "i12d208.p.ssafy.io"
 CHROMA_PORT = 8000
-REFERENCE_PARAGRAPH_COLLECTION_NAME = "reference_paragraphs"
+REFERENCE_PARAGRAPH_COLLECTION_NAME = "reference_paragraphs_v2"
 
-# ChromaDB 클라이언트 생성 및 컬렉션 가져오기
 chroma_client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
-reference_paragraph_collection = chroma_client.get_or_create_collection(name=REFERENCE_PARAGRAPH_COLLECTION_NAME)
 
-# 제목과 문단 간 유사도 비교 임계값 설정 (0.6 이상일 때만 분석 수행)
-TITLE_SIMILARITY_THRESHOLD = 0.6
+# ✅ 차원을 명시하여 768차원 컬렉션 사용
+reference_paragraph_collection = chroma_client.get_or_create_collection(
+    name=REFERENCE_PARAGRAPH_COLLECTION_NAME,
+    dimension=768
+)
 
-# Pydantic 모델 정의
+# 유사도 비교 임계값
+SIMILARITY_THRESHOLD = 0.6
+
+
 class NewsArticle(BaseModel):
-    title: str  # 제목 추가
-    paragraphs: List[str]    
+    title: str
+    paragraphs: List[str]
+
 
 class NewsReliabilityRequest(BaseModel):
     news: NewsArticle
     referenceParagraphIds: List[str]
+
 
 def fetch_reference_embeddings(reference_ids):
     result = reference_paragraph_collection.get(ids=reference_ids, include=["documents", "embeddings"])
@@ -53,8 +54,7 @@ def fetch_reference_embeddings(reference_ids):
 
 
 def compute_similarity(embedding1, embedding2):
-    similarity = np.dot(embedding1, embedding2) / (np.linalg.norm(embedding1) * np.linalg.norm(embedding2))
-    return similarity
+    return np.dot(embedding1, embedding2) / (np.linalg.norm(embedding1) * np.linalg.norm(embedding2))
 
 
 def analyze_paragraph(idx, paragraph_embedding, reference_embeddings, reference_texts):
@@ -67,7 +67,11 @@ def analyze_paragraph(idx, paragraph_embedding, reference_embeddings, reference_
             best_similarity = similarity
             best_reference_id = ref_id
 
-    best_reference_text = reference_texts.get(best_reference_id, "매칭 실패")
+    if best_similarity < SIMILARITY_THRESHOLD:
+        best_reference_text = "신뢰할 수 있는 참고 문단을 찾지 못했습니다."
+    else:
+        best_reference_text = reference_texts.get(best_reference_id, "매칭 실패")
+
     return idx, best_reference_text, best_similarity
 
 
@@ -83,19 +87,18 @@ async def analyze_news_reliability(request: NewsReliabilityRequest):
             "best_evidence_paragraphs": []
         }
 
-    # 1. 레퍼런스 임베딩 한번에 가져오기
     reference_embeddings, reference_texts = fetch_reference_embeddings(reference_ids)
 
-    # 2. 문단 임베딩 한번에 계산하기
     paragraph_embeddings = bert_model.encode(news_paragraphs)
 
-    # 3. 병렬 실행
     best_evidence_paragraphs = [None] * len(news_paragraphs)
     reliability_scores = [0.0] * len(news_paragraphs)
 
     with ThreadPoolExecutor(max_workers=5) as executor:
-        futures = [executor.submit(analyze_paragraph, i, paragraph_embeddings[i], reference_embeddings, reference_texts)
-                   for i in range(len(news_paragraphs))]
+        futures = [
+            executor.submit(analyze_paragraph, i, paragraph_embeddings[i], reference_embeddings, reference_texts)
+            for i in range(len(news_paragraphs))
+        ]
 
         for future in futures:
             idx, best_text, similarity = future.result()
@@ -106,6 +109,7 @@ async def analyze_news_reliability(request: NewsReliabilityRequest):
         "paragraph_reliability_scores": reliability_scores,
         "best_evidence_paragraphs": best_evidence_paragraphs
     }
+
 
 @app.post("/get-similar-references")
 async def get_similar_references(request: dict):
@@ -120,9 +124,8 @@ async def get_similar_references(request: dict):
     result = reference_paragraph_collection.query(
         query_embeddings=[query_embedding.tolist()],
         n_results=n_results,
-        include=["documents", "distances"]  # "ids" 제거!
+        include=["documents", "distances", "ids"]
     )
-
 
     if not result or "ids" not in result or not result["ids"]:
         return {"reference_ids": []}

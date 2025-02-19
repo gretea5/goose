@@ -87,24 +87,10 @@ public class NewsSearchService implements InternetSearchService {
         // ✅ MongoDB 실행
         List<NewsResponseDto> mongoData = mongoTemplate.find(query, NewsResponseDto.class, "news_articles");
 
-        // ✅ score 필터링 (10 이상만)
-        List<NewsResponseDto> filteredMongoData = mongoData.stream()
-                .filter(dto -> {
-                    try {
-                        // 리플렉션으로 score 접근 (DTO에 없을 경우)
-                        Object score = dto.getClass().getMethod("getScore").invoke(dto);
-                        if (score instanceof Number) {
-                            return ((Number) score).doubleValue() >= 10.0;
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return false;
-                })
-                .toList();
-
-        int mongoDataSize = filteredMongoData.size();
+        int mongoDataSize = mongoData.size();
         int neededFromNaver = resultCount - mongoDataSize;
+//        int neededFromNaver = 5;
+//        int mongoDataSize = 0;
 
         // 2️⃣ MongoDB 데이터 부족 시 Naver API 호출
         List<NewsResponseDto> resultData = new ArrayList<>(mongoData);

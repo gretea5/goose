@@ -143,8 +143,8 @@ public class FakeNewsStatisticsController {
         return ResponseEntity.ok(dto);
     }
 
-    @Operation(summary = "마이페이지 통계 조회",
-            description = "로그인 사용자의 경우, 닉네임, 지금까지 푼 총 문제 수, 맞춘 정답 수, 그리고 각 게임의 풀이 시각 목록 및 정답률(%)을 반환합니다.")
+    @Operation(summary = "사용자 게임 결과 통계 조회",
+            description = "로그인 사용자는 선택한 옵션, 정답 여부, 체류시간, 본인 닉네임 및 문제 풀이 시각과 함께 해당 뉴스의 체류시간 Top 3(닉네임+체류시간)를 반환합니다. 비로그인 사용자는 닉네임과 풀이 시각 없이 반환합니다.")
     @GetMapping("/mypage")
     public ResponseEntity<MyPageStatisticsDto> getMyPageStatistics(
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
@@ -153,33 +153,33 @@ public class FakeNewsStatisticsController {
         if ("guest".equals(nickname)) {
             return ResponseEntity.status(401).build();
         }
-        List<FakeNewsGameResult> results = gameResultRepository.findByUsername(username);
-        if (results.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        // 회원가입 정보를 얻기 위해 User 엔티티 조회
+
         User user = userRepository.findByUsername(username).orElse(null);
         if (user == null) {
             return ResponseEntity.status(404).build();
         }
+
+        // 회원가입 날짜 한국 시간(UTC+9)으로 변환
         LocalDateTime registrationDate = LocalDateTime.ofEpochSecond(user.getCreatedAt(), 0, ZoneOffset.ofHours(9));
 
-        // 회원가입 이전의 게임 기록은 제외
+        // 전체 게임 결과 조회 (MySQL)
+        List<FakeNewsGameResult> results = gameResultRepository.findByUsername(username);
+
+        // 전체 통계 (전체 게임 수, 맞춘 게임 수, 정답률)
+        int totalQuestions = results.size();
+        int correctCount = (int) results.stream().filter(FakeNewsGameResult::getCorrect).count();
+        double overallRate = totalQuestions > 0 ? ((double) correctCount / totalQuestions) * 100 : 0;
+        overallRate = Math.floor(overallRate); // 소수점 없이 정수 처리
+
+        // 회원가입 이후의 게임 기록만
         List<FakeNewsGameResult> filteredResults = results.stream()
                 .filter(r -> !r.getSolvedAt().isBefore(registrationDate))
                 .collect(Collectors.toList());
-
-        // 전체 통계 계산 (전체 게임 수, 맞춘 게임 수, 전체 정답률)
-        int totalQuestions = filteredResults.size();
-        int correctCount = (int) filteredResults.stream().filter(FakeNewsGameResult::getCorrect).count();
-        double overallRate = totalQuestions > 0 ? ((double) correctCount / totalQuestions) * 100 : 0;
-        overallRate = Math.floor(overallRate); // 소수점 없이 정수 처리
 
         // 게임 기록 그룹화
         Map<YearMonth, List<FakeNewsGameResult>> grouped = filteredResults.stream()
                 .collect(Collectors.groupingBy(r -> YearMonth.from(r.getSolvedAt())));
 
-        // 회원가입 월부터 현재 월까지의 목록 생성
         YearMonth currentMonth = YearMonth.from(LocalDateTime.now());
         YearMonth regMonth = YearMonth.from(registrationDate);
         List<YearMonth> monthList = new ArrayList<>();
@@ -188,12 +188,13 @@ public class FakeNewsStatisticsController {
             monthList.add(temp);
             temp = temp.plusMonths(1);
         }
-        // 최근 최대 6개월만 반환 (만약 회원가입 이후 기간이 6개월 미만이면 그 만큼의 기간만)
+
+        // 최근 6개월만
         if (monthList.size() > 6) {
             monthList = monthList.subList(monthList.size() - 6, monthList.size());
         }
 
-        // 월별 정답률 계산: 각 월에 대한 총 게임 수, 맞춘 게임 수, 정답률 계산
+        // 월별 정답률
         List<MyPageStatisticsDto.MonthlyStatDto> monthlyStats = new ArrayList<>();
         for (YearMonth ym : monthList) {
             List<FakeNewsGameResult> monthResults = grouped.getOrDefault(ym, new ArrayList<>());

@@ -16,20 +16,25 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 
 @Service
 public class NewsSearchService implements InternetSearchService {
@@ -180,30 +185,63 @@ public class NewsSearchService implements InternetSearchService {
                 return null;
             }
 
-            // 2️⃣ 문단 분리 수행
             List<String> paragraphs = newsParagraphSplitService.getSplitParagraphs(content);
 
-            // 3️⃣ ID 생성 및 기사 객체 생성
+            // 2️⃣ 크로마DB 본문 유사 뉴스 기사 1개 검색 (레퍼런스 뉴스가 아닌 일반 뉴스기사 기준)
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, Object> requestBody = Map.of("query", content, "n_results", 1);
+            HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<Map> response = new RestTemplate().postForEntity(
+                    "http://localhost:5061/get-similar-news-articles", // FastAPI 서버 주소
+                    requestEntity,
+                    Map.class
+            );
+
+            List<String> similarNewsIds = (List<String>) response.getBody().get("news_article_ids");
+            if (similarNewsIds == null || similarNewsIds.isEmpty()) {
+                System.out.println("❌ 유사 뉴스 기사 찾기 실패");
+                return null;
+            }
+
+            String mostSimilarNewsId = similarNewsIds.get(0).replace("_content", "");
+            System.out.println("🔍 가장 유사한 뉴스 기사 ID: " + mostSimilarNewsId);
+
+            // 3️⃣ MongoDB에서 유사 뉴스 기사 조회 (레퍼런스가 아닌 일반 뉴스 기사)
+            Query query = new Query(Criteria.where("_id").is(mostSimilarNewsId));
+            NewsResponseDto similarNewsDto = mongoTemplate.findOne(query, NewsResponseDto.class, "news_articles");
+
+            if (similarNewsDto == null) {
+                System.out.println("❌ 유사 뉴스 MongoDB 조회 실패");
+                return null;
+            }
+
+            // 4️⃣ 새 뉴스 ID 생성 (크롤링한 현재 뉴스에 대한 ID)
             String newsId = new ObjectId().toString();
+
+            // 5️⃣ 유사한 뉴스 기사 객체 사용
             NewsResponseDto newsDto = NewsResponseDto.builder()
-                    .id(newsId)
-                    .title(cleanTitle)
-                    .originalLink(url)
-                    .naverLink(url)
-                    .description("")  // URL 직접 검색이므로 description 없음
-                    .pubDate("")       // URL 직접 검색이므로 pubDate 없음
-                    .content(content)
-                    .paragraphs(paragraphs)
+                    .id(similarNewsDto.getId())
+                    .title(similarNewsDto.getTitle())
+                    .originalLink(similarNewsDto.getOriginalLink())
+                    .naverLink(similarNewsDto.getNaverLink())
+                    .description(similarNewsDto.getDescription())
+                    .pubDate(similarNewsDto.getPubDate())
+                    .content(similarNewsDto.getContent())
+                    .paragraphs(similarNewsDto.getParagraphs())
                     .paragraphReliabilities(new ArrayList<>())
                     .paragraphReasons(new ArrayList<>())
-                    .topImage(topImage)
-                    .extractedAt(LocalDateTime.now())
+                    .topImage(similarNewsDto.getTopImage())
+                    .extractedAt(similarNewsDto.getExtractedAt())
                     .biasScore(0.0)
                     .reliability(50.0)
                     .build();
 
-            // 4️⃣ 크로마 DB 저장 & 신뢰도 분석 병렬 실행
-            ExecutorService executor = Executors.newFixedThreadPool(20);
+
+            // 6️⃣ 크로마DB 저장 & 신뢰도 분석 병렬 실행
+            ExecutorService executor = Executors.newFixedThreadPool(2);
 
             CompletableFuture<Void> embeddingFuture = CompletableFuture.runAsync(() ->
                     embeddingStorageService.storeNews(
@@ -217,18 +255,27 @@ public class NewsSearchService implements InternetSearchService {
                     ), executor);
 
             CompletableFuture<BiasAnalysisResult> analysisFuture = CompletableFuture.supplyAsync(() ->
-                    biasAnalyseService.analyzeBias(
-                            newsDto.getId(),
-                            newsDto.getTitle(),
-                            newsDto.getContent(),
-                            newsDto.getParagraphs()
+                    biasAnalyseService.analyzeBiasWithReference(
+                            newsId,
+                            cleanTitle,
+                            content,
+                            paragraphs,
+                            List.of(
+                                    ReferenceNewsArticle.builder()
+                                            .id(similarNewsDto.getId())
+                                            .title(similarNewsDto.getTitle())
+                                            .content(similarNewsDto.getContent())
+                                            .paragraphs(similarNewsDto.getParagraphs())
+                                            .pubDate(similarNewsDto.getPubDate())
+                                            .build()
+                            )
                     ), executor);
 
-            // 5️⃣ 병렬 작업 완료 대기
+            // 7️⃣ 병렬 작업 완료 대기
             embeddingFuture.join(); // 임베딩 저장 완료 대기
             BiasAnalysisResult analysisResult = analysisFuture.join(); // 분석 완료 대기
 
-            // 6️⃣ 분석 결과 반영
+            // 8️⃣ 분석 결과 반영
             newsDto.setBiasScore(analysisResult.getBiasScore());
             newsDto.setReliability(analysisResult.getReliability());
             newsDto.setParagraphReliabilities(analysisResult.getParagraphReliabilities());
@@ -236,13 +283,16 @@ public class NewsSearchService implements InternetSearchService {
 
             executor.shutdown();
 
+            // 9️⃣ 결과 반환
             return newsDto;
 
         } catch (Exception e) {
             System.err.println("❌ searchByUrl() 실패: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
+
 
 
     // ✅ SSL 인증 우회 설정

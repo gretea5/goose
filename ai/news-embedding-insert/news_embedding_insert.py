@@ -7,7 +7,7 @@ import chromadb
 app = FastAPI()
 
 CHROMA_HOST = "i12d208.p.ssafy.io"
-CHROMA_PORT = 8000
+CHROMA_PORT = 8001
 
 NEWS_TITLE_COLLECTION_V2 = "news_articles_title_v2"
 NEWS_CONTENT_COLLECTION_V2 = "news_articles_content_v2"
@@ -21,25 +21,20 @@ embedding_model = SentenceTransformer("all-mpnet-base-v2")
 chroma_client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
 
 title_collection = chroma_client.get_or_create_collection(
-    name=NEWS_TITLE_COLLECTION_V2,
-    dimension=768
+    name=NEWS_TITLE_COLLECTION_V2
 )
 content_collection = chroma_client.get_or_create_collection(
-    name=NEWS_CONTENT_COLLECTION_V2,
-    dimension=768
+    name=NEWS_CONTENT_COLLECTION_V2
 )
 paragraph_collection = chroma_client.get_or_create_collection(
-    name=NEWS_PARAGRAPH_COLLECTION_V2,
-    dimension=768
+    name=NEWS_PARAGRAPH_COLLECTION_V2
 )
 
 reference_paragraph_collection = chroma_client.get_or_create_collection(
-    name=REFERENCE_PARAGRAPH_COLLECTION_V2,
-    dimension=768
+    name=REFERENCE_PARAGRAPH_COLLECTION_V2
 )
 reference_content_collection = chroma_client.get_or_create_collection(
-    name=REFERENCE_CONTENT_COLLECTION_V2,
-    dimension=768
+    name=REFERENCE_CONTENT_COLLECTION_V2
 )
 
 
@@ -56,12 +51,12 @@ async def store_news(news: NewsArticle):
     title_embedding = embedding_model.encode(news.title).tolist()
     content_embedding = embedding_model.encode(news.content).tolist()
 
-    title_collection.add(ids=[news.id + "_title"], documents=[news.title], embeddings=[title_embedding])
-    content_collection.add(ids=[news.id + "_content"], documents=[news.content], embeddings=[content_embedding])
+    title_collection.upsert(ids=[news.id + "_title"], documents=[news.title], embeddings=[title_embedding])
+    content_collection.upsert(ids=[news.id + "_content"], documents=[news.content], embeddings=[content_embedding])
 
     for i, paragraph in enumerate(news.paragraphs):
         paragraph_embedding = embedding_model.encode(paragraph).tolist()
-        paragraph_collection.add(ids=[f"{news.id}_p_{i}"], documents=[paragraph], embeddings=[paragraph_embedding])
+        paragraph_collection.upsert(ids=[f"{news.id}_p_{i}"], documents=[paragraph], embeddings=[paragraph_embedding])
 
     return {"status": "success"}
 
@@ -70,10 +65,10 @@ async def store_news(news: NewsArticle):
 async def store_reference_news(news: NewsArticle):
     content_embedding = embedding_model.encode(news.content).tolist()
 
-    reference_content_collection.add(ids=[news.id + "_content"], documents=[news.content], embeddings=[content_embedding])
+    reference_content_collection.upsert(ids=[news.id + "_content"], documents=[news.content], embeddings=[content_embedding])
 
     for i, paragraph in enumerate(news.paragraphs):
         paragraph_embedding = embedding_model.encode(paragraph).tolist()
-        reference_paragraph_collection.add(ids=[f"{news.id}_p_{i}"], documents=[paragraph], embeddings=[paragraph_embedding])
+        reference_paragraph_collection.upsert(ids=[f"{news.id}_p_{i}"], documents=[paragraph], embeddings=[paragraph_embedding])
 
     return {"status": "success"}

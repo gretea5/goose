@@ -24,8 +24,8 @@ public class GooseApplication {
 	) {
 		return args -> {
 			// ✅ 자동 뉴스 크롤링
-			 System.out.println("🚀 애플리케이션 실행 후 즉시 뉴스 크롤링 시작...");
-			 autoCrawlingService.fetchAndSaveTrendingNews();
+//			 System.out.println("🚀 애플리케이션 실행 후 즉시 뉴스 크롤링 시작...");
+//			 autoCrawlingService.fetchAndSaveTrendingNews();
 		};
 	}
 }

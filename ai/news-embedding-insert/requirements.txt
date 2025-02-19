@@ -1,6 +1,6 @@
 torch
 openai==0.27.0
-chromadb==0.6.3
+chromadb==0.4.24
 fastapi==0.110.0
 uvicorn==0.29.0
 sentence-transformers==2.2.2
@@ -11,4 +11,3 @@ pydantic-settings==2.1.0  # 안정적으로 사용되는 버전
 huggingface_hub==0.14.1
 PyYAML>=6.0.1
 pymongo==4.3.3
-chromadb-client

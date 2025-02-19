@@ -51,37 +51,77 @@ news_paragraph_collection = chroma_client.get_or_create_collection(
 
 def update_reference_news_embeddings():
     print("[INFO] 참조 뉴스 임베딩 업데이트 시작")
+
+    existing_paragraph_data = reference_paragraph_collection.get(include=["documents", "embeddings", "metadatas"])
+    existing_content_data = reference_content_collection.get(include=["documents", "embeddings", "metadatas"])
+
+    existing_paragraph_ids = set(existing_paragraph_data["ids"])
+    existing_content_ids = set(existing_content_data["ids"])
+
+    # 임베딩이 None이거나 누락된 ID 찾기
+    paragraph_ids_to_update = set(
+        doc_id for doc_id, emb in zip(existing_paragraph_data["ids"], existing_paragraph_data["embeddings"]) if emb is None
+    )
+    content_ids_to_update = set(
+        doc_id for doc_id, emb in zip(existing_content_data["ids"], existing_content_data["embeddings"]) if emb is None
+    )
+
     documents = reference_news_collection.find({})
     for doc in documents:
         news_id = str(doc["_id"])
-        title = doc.get("title", "")
         content = doc.get("content", "")
         paragraphs = doc.get("paragraphs", [])
 
         for idx, paragraph in enumerate(paragraphs):
-            embedding = embedding_model.encode(paragraph).tolist()
             doc_id = f"{news_id}_p_{idx}"
-            reference_paragraph_collection.upsert(
-                ids=[doc_id],
-                documents=[paragraph],
-                embeddings=[embedding],
-                metadatas=[{"news_id": news_id, "type": "paragraph"}]
-            )
+            if doc_id not in existing_paragraph_ids or doc_id in paragraph_ids_to_update:
+                embedding = embedding_model.encode(paragraph).tolist()
+                reference_paragraph_collection.upsert(
+                    ids=[doc_id],
+                    documents=[paragraph],
+                    embeddings=[embedding],
+                    metadatas=[{"news_id": news_id, "type": "paragraph"}]
+                )
 
         if content:
-            embedding = embedding_model.encode(content).tolist()
-            reference_content_collection.upsert(
-                ids=[f"{news_id}_content"],
-                documents=[content],
-                embeddings=[embedding],
-                metadatas=[{"news_id": news_id, "type": "content"}]
-            )
+            content_id = f"{news_id}_content"
+            if content_id not in existing_content_ids or content_id in content_ids_to_update:
+                embedding = embedding_model.encode(content).tolist()
+                reference_content_collection.upsert(
+                    ids=[content_id],
+                    documents=[content],
+                    embeddings=[embedding],
+                    metadatas=[{"news_id": news_id, "type": "content"}]
+                )
 
     print("[INFO] 참조 뉴스 임베딩 업데이트 완료")
 
 
+
+
+
 def update_news_articles_embeddings():
     print("[INFO] 뉴스 기사 임베딩 업데이트 시작")
+
+    existing_title_data = news_title_collection.get(include=["documents", "embeddings", "metadatas"])
+    existing_content_data = news_content_collection.get(include=["documents", "embeddings", "metadatas"])
+    existing_paragraph_data = news_paragraph_collection.get(include=["documents", "embeddings", "metadatas"])
+
+    existing_title_ids = set(existing_title_data["ids"])
+    existing_content_ids = set(existing_content_data["ids"])
+    existing_paragraph_ids = set(existing_paragraph_data["ids"])
+
+    # 임베딩이 None이거나 누락된 ID 찾기
+    title_ids_to_update = set(
+        doc_id for doc_id, emb in zip(existing_title_data["ids"], existing_title_data["embeddings"]) if emb is None
+    )
+    content_ids_to_update = set(
+        doc_id for doc_id, emb in zip(existing_content_data["ids"], existing_content_data["embeddings"]) if emb is None
+    )
+    paragraph_ids_to_update = set(
+        doc_id for doc_id, emb in zip(existing_paragraph_data["ids"], existing_paragraph_data["embeddings"]) if emb is None
+    )
+
     documents = news_articles_collection.find({})
     for doc in documents:
         news_id = str(doc["_id"])
@@ -90,34 +130,41 @@ def update_news_articles_embeddings():
         paragraphs = doc.get("paragraphs", [])
 
         if title:
-            embedding = embedding_model.encode(title).tolist()
-            news_title_collection.upsert(
-                ids=[f"{news_id}_title"],
-                documents=[title],
-                embeddings=[embedding],
-                metadatas=[{"news_id": news_id, "type": "title"}]
-            )
+            title_id = f"{news_id}_title"
+            if title_id not in existing_title_ids or title_id in title_ids_to_update:
+                embedding = embedding_model.encode(title).tolist()
+                news_title_collection.upsert(
+                    ids=[title_id],
+                    documents=[title],
+                    embeddings=[embedding],
+                    metadatas=[{"news_id": news_id, "type": "title"}]
+                )
 
         if content:
-            embedding = embedding_model.encode(content).tolist()
-            news_content_collection.upsert(
-                ids=[f"{news_id}_content"],
-                documents=[content],
-                embeddings=[embedding],
-                metadatas=[{"news_id": news_id, "type": "content"}]
-            )
+            content_id = f"{news_id}_content"
+            if content_id not in existing_content_ids or content_id in content_ids_to_update:
+                embedding = embedding_model.encode(content).tolist()
+                news_content_collection.upsert(
+                    ids=[content_id],
+                    documents=[content],
+                    embeddings=[embedding],
+                    metadatas=[{"news_id": news_id, "type": "content"}]
+                )
 
         for idx, paragraph in enumerate(paragraphs):
-            embedding = embedding_model.encode(paragraph).tolist()
-            doc_id = f"{news_id}_p_{idx}"
-            news_paragraph_collection.upsert(
-                ids=[doc_id],
-                documents=[paragraph],
-                embeddings=[embedding],
-                metadatas=[{"news_id": news_id, "type": "paragraph"}]
-            )
+            paragraph_id = f"{news_id}_p_{idx}"
+            if paragraph_id not in existing_paragraph_ids or paragraph_id in paragraph_ids_to_update:
+                embedding = embedding_model.encode(paragraph).tolist()
+                news_paragraph_collection.upsert(
+                    ids=[paragraph_id],
+                    documents=[paragraph],
+                    embeddings=[embedding],
+                    metadatas=[{"news_id": news_id, "type": "paragraph"}]
+                )
 
     print("[INFO] 뉴스 기사 임베딩 업데이트 완료")
+
+
 
 
 def update_all_embeddings():

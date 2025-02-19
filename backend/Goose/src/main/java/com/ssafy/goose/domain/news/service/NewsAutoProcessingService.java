@@ -1,5 +1,6 @@
 package com.ssafy.goose.domain.news.service;
 
+import com.ssafy.goose.domain.contentsearch.external.NewsAgencyExtractor;
 import com.ssafy.goose.domain.news.entity.NewsArticle;
 import com.ssafy.goose.domain.news.entity.ReferenceNewsArticle;
 import com.ssafy.goose.domain.news.service.airate.AiRateService;
@@ -7,8 +8,11 @@ import com.ssafy.goose.domain.news.service.bias.BiasAnalyseService;
 import com.ssafy.goose.domain.news.service.bias.BiasAnalysisResult;
 import com.ssafy.goose.domain.news.service.crawling.NewsContentScraping;
 import com.ssafy.goose.domain.news.service.paragraph.NewsParagraphSplitService;
+import com.ssafy.goose.domain.warning.entity.WarningNewsAgency;
+import com.ssafy.goose.domain.warning.repository.WarningNewsAgencyRepository;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,31 +25,37 @@ public class NewsAutoProcessingService {
     private final BiasAnalyseService biasAnalyseService;
     private final NewsStorageService newsStorageService;
     private final AiRateService aiRateService;
+    private final WarningNewsAgencyRepository warningNewsAgencyRepository;
+    private final NewsAgencyExtractor newsAgencyExtractor;
+
+    private final EmbeddingStorageService embeddingStorageService;
 
     public NewsAutoProcessingService(NewsContentScraping newsContentScraping,
                                      NewsParagraphSplitService newsParagraphSplitService,
                                      BiasAnalyseService biasAnalyseService,
                                      NewsStorageService newsStorageService,
-                                     AiRateService aiRateService) {
+                                     AiRateService aiRateService,
+                                     WarningNewsAgencyRepository warningNewsAgencyRepository,
+                                     NewsAgencyExtractor newsAgencyExtractor,
+                                     EmbeddingStorageService embeddingStorageService) {
         this.newsContentScraping = newsContentScraping;
         this.newsParagraphSplitService = newsParagraphSplitService;
         this.biasAnalyseService = biasAnalyseService;
         this.newsStorageService = newsStorageService;
         this.aiRateService = aiRateService;
+        this.warningNewsAgencyRepository = warningNewsAgencyRepository;
+        this.newsAgencyExtractor = newsAgencyExtractor;
+        this.embeddingStorageService = embeddingStorageService;
     }
 
-    /**
-     * 뉴스 기사를 크롤링, 분석, 가공한 후 MongoDB에 저장하는 메서드
-     */
+    @Transactional
     public void processAndStoreNewsArticles(Map<String, Object> newsData) {
         List<Map<String, Object>> newsItems = (List<Map<String, Object>>) newsData.get("items");
 
         for (Map<String, Object> item : newsItems) {
-            // 1. 뉴스 기사 링크 가져오기
             String link = (String) item.get("link");
             if (link == null || link.isEmpty()) continue;
 
-            // 2. FastAPI를 이용해 뉴스 본문과 대표 이미지 크롤링
             Map<String, Object> scrapedData = newsContentScraping.extractArticle(link);
             if (scrapedData == null || !scrapedData.containsKey("text")) continue;
 
@@ -53,16 +63,24 @@ public class NewsAutoProcessingService {
             String content = (String) scrapedData.get("text");
             String topImage = (String) scrapedData.get("image");
 
-            // 3. 본문이 너무 짧은 경우 제외
             if (content.length() < 100) continue;
 
-            // 4. 문단 분리 수행 (FastAPI 이용)
             List<String> paragraphs = newsParagraphSplitService.getSplitParagraphs(content);
-
             System.out.println("문단 분리 수행 완료, 문단 갯수 : " + paragraphs.size());
 
-
             String newsId = new ObjectId().toString();
+
+            // ✅ 크로마DB 저장 (임베딩 저장) - 5번 분석 전에 실행
+            embeddingStorageService.storeNews(
+                    EmbeddingStorageService.EmbeddingRequest.builder()
+                            .id(newsId)
+                            .title(cleanTitle)
+                            .content(content)
+                            .paragraphs(paragraphs)
+                            .pubDate((String) item.get("pubDate"))
+                            .build()
+            );
+            System.out.println("News 임베딩 저장 완료: " + newsId);
 
             // 5. 편향성 분석 수행 (문단별 신뢰도/분석 사유 포함)
             BiasAnalysisResult analysisResult = biasAnalyseService.analyzeBias(newsId, cleanTitle, content, paragraphs);
@@ -70,7 +88,15 @@ public class NewsAutoProcessingService {
             // 6. AI 확률 계산
             Double aiRate = aiRateService.calculateAiRate(cleanTitle, paragraphs);
 
-            // 7. MongoDB 저장 객체 생성 (분석 결과 반영)
+            // 7. 언론사 신뢰도 가져오기
+            String newsAgency = newsAgencyExtractor.extractNewsAgency(link);
+            WarningNewsAgency agency = warningNewsAgencyRepository.findByNewsAgency(newsAgency);
+            int ranking = (agency != null) ? agency.getRanking() : 999; // 없으면 최하위 취급
+
+            // 8. 최종 신뢰도 계산
+            Double resultReliability = calculateFinalReliability(analysisResult.getBiasScore(), aiRate, ranking);
+
+            // 9. MongoDB 저장 객체 생성 (분석 결과 반영)
             NewsArticle article = NewsArticle.builder()
                     .id(newsId)
                     .title(cleanTitle)
@@ -83,29 +109,41 @@ public class NewsAutoProcessingService {
                     .topImage(topImage)
                     .extractedAt(LocalDateTime.now())
                     .biasScore(analysisResult.getBiasScore())
-                    .reliability(analysisResult.getReliability())
+                    .reliability(resultReliability)
                     .paragraphReliabilities(analysisResult.getParagraphReliabilities())
                     .paragraphReasons(analysisResult.getParagraphReasons())
                     .aiRate(aiRate)
+                    .newsAgency(newsAgency)
                     .build();
 
-            // 8. MongoDB에 저장
+            // 10. MongoDB에 저장
             newsStorageService.saveToMongoDB(article);
         }
     }
 
     /**
-     * 참고용 뉴스 기사를 크롤링, 분석, 가공한 후 MongoDB에 저장하는 메서드
+     * 최종 신뢰도 계산 메서드
+     * @param biasScore    편향성 점수 (0~100)
+     * @param aiRate       AI 생성 확률 (0~1)
+     * @param ranking      언론사 랭킹 (작을수록 신뢰 높음)
+     * @return 최종 신뢰도 (0~1)
      */
+    private Double calculateFinalReliability(Double biasScore, Double aiRate, int ranking) {
+        double rankingNormalized = 1 - (ranking / 100.0);
+        rankingNormalized = Math.max(0, Math.min(rankingNormalized, 1));
+
+        double biasNormalized = biasScore / 100.0;
+
+        return biasNormalized * 0.4 + aiRate * 0.3 + rankingNormalized * 0.3;
+    }
+
     public void processAndStoreReferenceNewsArticles(Map<String, Object> newsData) {
         List<Map<String, Object>> newsItems = (List<Map<String, Object>>) newsData.get("items");
 
         for (Map<String, Object> item : newsItems) {
-            // 1. 뉴스 기사 링크 가져오기
             String link = (String) item.get("link");
             if (link == null || link.isEmpty()) continue;
 
-            // 2. FastAPI를 이용해 뉴스 본문과 대표 이미지 크롤링
             Map<String, Object> scrapedData = newsContentScraping.extractArticle(link);
             if (scrapedData == null || !scrapedData.containsKey("text")) continue;
 
@@ -113,13 +151,10 @@ public class NewsAutoProcessingService {
             String content = (String) scrapedData.get("text");
             String topImage = (String) scrapedData.get("image");
 
-            // 3. 본문이 너무 짧은 경우 제외
             if (content.length() < 100) continue;
 
-            // 4. 문단 분리 수행 (FastAPI 이용)
             List<String> paragraphs = newsParagraphSplitService.getSplitParagraphs(content);
 
-            // 5. MongoDB 저장 객체 생성
             ReferenceNewsArticle article = ReferenceNewsArticle.builder()
                     .title(cleanTitle)
                     .originalLink((String) item.get("originallink"))
@@ -132,7 +167,6 @@ public class NewsAutoProcessingService {
                     .extractedAt(LocalDateTime.now())
                     .build();
 
-            // 6. MongoDB에 저장
             newsStorageService.saveReferenceToMongoDB(article);
         }
     }

@@ -20,8 +20,8 @@ import java.util.stream.IntStream;
 @Service
 public class AnalyseByContent {
     private final RestTemplate restTemplate = new RestTemplate();
-    private static final String CONTENT_COMPARE_CONTENTS_API_URL = "http://i12d208.p.ssafy.io:5062/paragraph-compare-contents";
-//    private static final String CONTENT_COMPARE_CONTENTS_API_URL = "http://localhost:5062/paragraph-compare-contents";
+//    private static final String CONTENT_COMPARE_CONTENTS_API_URL = "http://i12d208.p.ssafy.io:5062/paragraph-compare-contents";
+    private static final String CONTENT_COMPARE_CONTENTS_API_URL = "http://localhost:5062/paragraph-compare-contents";
 
     public double checkContentWithReference(String newsId, List<ReferenceNewsArticle> referenceNewsList) {
         if (referenceNewsList.isEmpty()) {

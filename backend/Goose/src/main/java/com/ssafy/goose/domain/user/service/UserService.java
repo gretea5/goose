@@ -111,6 +111,8 @@ public class UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
+        boolean updated = false;
+
         // newNickname 수정 (중복 체크)
         if (updateRequest.getNewNickname() != null && !updateRequest.getNewNickname().trim().isEmpty()
                 && !updateRequest.getNewNickname().equals(user.getNickname())) {
@@ -118,15 +120,21 @@ public class UserService {
                 return UserResponseDto.error("이미 사용 중인 닉네임입니다.");
             }
             user.setNickname(updateRequest.getNewNickname());
+            updated = true;
         }
 
         // newPassword 수정 (암호화 후 저장)
         if (updateRequest.getNewPassword() != null && !updateRequest.getNewPassword().trim().isEmpty()) {
             user.setPassword(passwordEncoder.encode(updateRequest.getNewPassword()));
+            updated = true;
         }
-
         userRepository.save(user);
-        return UserResponseDto.success(user.getNickname());
+
+        if (updated) {
+            return generateNewTokens(user);
+        } else {
+            return UserResponseDto.success(user.getNickname());
+        }
     }
 
     // AccessToken & RefreshToken을 생성하는 공통 메서드
@@ -142,7 +150,7 @@ public class UserService {
             userRepository.save(user);
         }
 
-        return UserResponseDto.success(accessToken, refreshToken, null);
+        return UserResponseDto.success(accessToken, refreshToken, user.getNickname());
     }
 
     // 회원 가입 시 ID 중복 체크

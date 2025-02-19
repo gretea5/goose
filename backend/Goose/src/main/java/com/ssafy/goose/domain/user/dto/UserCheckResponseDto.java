@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class UserCheckResponseDto {
-    private boolean available;  // true: 사용 가능, false: 중복됨
+    private boolean available;
     private String message;
 }

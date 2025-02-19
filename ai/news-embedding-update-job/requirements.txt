@@ -1,8 +1,7 @@
 schedule==1.1.0
 pymongo==4.3.3
 sentence-transformers==2.2.2
-chromadb==0.6.3
+chromadb==0.4.24
 numpy==1.26.2
-pydantic==1.10.7
+pydantic==2.7.1  # 최신 v2
 huggingface_hub==0.14.1
-chromadb-client

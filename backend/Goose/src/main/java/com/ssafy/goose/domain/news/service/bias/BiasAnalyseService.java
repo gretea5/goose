@@ -118,9 +118,15 @@ public class BiasAnalyseService {
             Double bias_content = contentFuture.get();
             ParagraphAnalysisResult paragraphAnalysisResult = paragraphFuture.get();
 
-            Double paragraph_reliability = paragraphAnalysisResult.getAverageReliability();
+            // ✅ 여기 수정됨! (0~1 -> 0~100 맞춰줌)
+            Double paragraph_reliability = paragraphAnalysisResult.getAverageReliability() * 100;
 
             double finalScore = (bias_title + bias_content + paragraph_reliability) / 3;
+            System.out.println("bias_title : " + bias_title);
+            System.out.println("bias_content : " + bias_content);
+            System.out.println("paragraph_reliability (0~100 스케일 조정 후) : " + paragraph_reliability);
+            System.out.println("finalScore : " + finalScore);
+            System.out.println();
 
             return BiasAnalysisResult.builder()
                     .biasScore(finalScore)
@@ -134,4 +140,5 @@ public class BiasAnalyseService {
             throw new RuntimeException("Bias analysis failed", e);
         }
     }
+
 }

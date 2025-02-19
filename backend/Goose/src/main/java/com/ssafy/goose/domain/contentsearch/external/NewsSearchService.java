@@ -23,13 +23,13 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 
 @Service
 public class NewsSearchService implements InternetSearchService {
@@ -87,31 +87,17 @@ public class NewsSearchService implements InternetSearchService {
         // ✅ MongoDB 실행
         List<NewsResponseDto> mongoData = mongoTemplate.find(query, NewsResponseDto.class, "news_articles");
 
-        // ✅ score 필터링 (10 이상만)
-        List<NewsResponseDto> filteredMongoData = mongoData.stream()
-                .filter(dto -> {
-                    try {
-                        // 리플렉션으로 score 접근 (DTO에 없을 경우)
-                        Object score = dto.getClass().getMethod("getScore").invoke(dto);
-                        if (score instanceof Number) {
-                            return ((Number) score).doubleValue() >= 10.0;
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return false;
-                })
-                .toList();
-
-        int mongoDataSize = filteredMongoData.size();
+        int mongoDataSize = mongoData.size();
         int neededFromNaver = resultCount - mongoDataSize;
+//        int neededFromNaver = 5;
+//        int mongoDataSize = 0;
 
         // 2️⃣ MongoDB 데이터 부족 시 Naver API 호출
         List<NewsResponseDto> resultData = new ArrayList<>(mongoData);
-        if (mongoDataSize < resultCount) {
-            List<NewsResponseDto> naverData = naverNewsFetcher.fetchNaverNews(keywords);
-            resultData.addAll(naverData.subList(0, Math.min(neededFromNaver, naverData.size())));
-        }
+//        if (mongoDataSize < resultCount) {
+//            List<NewsResponseDto> naverData = naverNewsFetcher.fetchNaverNews(keywords);
+//            resultData.addAll(naverData.subList(0, Math.min(neededFromNaver, naverData.size())));
+//        }
 
         // ✅ 최대 resultCount(5개) 제한
         if (resultData.size() > resultCount) {
@@ -178,85 +164,38 @@ public class NewsSearchService implements InternetSearchService {
     @Override
     public NewsResponseDto searchByUrl(String url) {
         try {
-            // 1️⃣ 뉴스 본문 크롤링
+            // 1️⃣ 뉴스 본문 크롤링 (타이틀만 사용)
             Map<String, Object> scrapedData = newsContentScraping.extractArticle(url);
-            if (scrapedData == null || !scrapedData.containsKey("text")) {
+            if (scrapedData == null || !scrapedData.containsKey("title")) {
                 System.out.println("❌ 뉴스 본문 크롤링 실패");
                 return null;
             }
-
             String cleanTitle = (String) scrapedData.get("title");
-            String content = (String) scrapedData.get("text");
-            String topImage = (String) scrapedData.get("image");
 
-            if (content.length() < 100) {
-                System.out.println("❌ 본문이 너무 짧아서 제외");
+            // 2️⃣ MongoDB 텍스트 인덱스를 활용해 제목 기반 가장 유사한 뉴스 찾기
+            Query query = new Query();
+            query.addCriteria(Criteria.where("$text").is(new org.bson.Document("$search", cleanTitle)));
+            query.with(Sort.by(Sort.Order.desc("score")));
+            query.limit(1);
+
+            NewsResponseDto similarNewsDto = mongoTemplate.findOne(query, NewsResponseDto.class, "news_articles");
+
+            if (similarNewsDto == null) {
+                System.out.println("❌ 유사 뉴스 제목 기반 MongoDB 조회 실패");
                 return null;
             }
 
-            // 2️⃣ 문단 분리 수행
-            List<String> paragraphs = newsParagraphSplitService.getSplitParagraphs(content);
-
-            // 3️⃣ ID 생성 및 기사 객체 생성
-            String newsId = new ObjectId().toString();
-            NewsResponseDto newsDto = NewsResponseDto.builder()
-                    .id(newsId)
-                    .title(cleanTitle)
-                    .originalLink(url)
-                    .naverLink(url)
-                    .description("")  // URL 직접 검색이므로 description 없음
-                    .pubDate("")       // URL 직접 검색이므로 pubDate 없음
-                    .content(content)
-                    .paragraphs(paragraphs)
-                    .paragraphReliabilities(new ArrayList<>())
-                    .paragraphReasons(new ArrayList<>())
-                    .topImage(topImage)
-                    .extractedAt(LocalDateTime.now())
-                    .biasScore(0.0)
-                    .reliability(50.0)
-                    .build();
-
-            // 4️⃣ 크로마 DB 저장 & 신뢰도 분석 병렬 실행
-            ExecutorService executor = Executors.newFixedThreadPool(20);
-
-            CompletableFuture<Void> embeddingFuture = CompletableFuture.runAsync(() ->
-                    embeddingStorageService.storeNews(
-                            EmbeddingStorageService.EmbeddingRequest.builder()
-                                    .id(newsId)
-                                    .title(cleanTitle)
-                                    .content(content)
-                                    .paragraphs(paragraphs)
-                                    .pubDate("")
-                                    .build()
-                    ), executor);
-
-            CompletableFuture<BiasAnalysisResult> analysisFuture = CompletableFuture.supplyAsync(() ->
-                    biasAnalyseService.analyzeBias(
-                            newsDto.getId(),
-                            newsDto.getTitle(),
-                            newsDto.getContent(),
-                            newsDto.getParagraphs()
-                    ), executor);
-
-            // 5️⃣ 병렬 작업 완료 대기
-            embeddingFuture.join(); // 임베딩 저장 완료 대기
-            BiasAnalysisResult analysisResult = analysisFuture.join(); // 분석 완료 대기
-
-            // 6️⃣ 분석 결과 반영
-            newsDto.setBiasScore(analysisResult.getBiasScore());
-            newsDto.setReliability(analysisResult.getReliability());
-            newsDto.setParagraphReliabilities(analysisResult.getParagraphReliabilities());
-            newsDto.setParagraphReasons(analysisResult.getParagraphReasons());
-
-            executor.shutdown();
-
-            return newsDto;
+            // ✅ 유사한 뉴스 기사를 그대로 반환
+            return similarNewsDto;
 
         } catch (Exception e) {
             System.err.println("❌ searchByUrl() 실패: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
+
+
 
 
     // ✅ SSL 인증 우회 설정

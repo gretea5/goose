@@ -94,10 +94,10 @@ public class NewsSearchService implements InternetSearchService {
 
         // 2️⃣ MongoDB 데이터 부족 시 Naver API 호출
         List<NewsResponseDto> resultData = new ArrayList<>(mongoData);
-        if (mongoDataSize < resultCount) {
-            List<NewsResponseDto> naverData = naverNewsFetcher.fetchNaverNews(keywords);
-            resultData.addAll(naverData.subList(0, Math.min(neededFromNaver, naverData.size())));
-        }
+//        if (mongoDataSize < resultCount) {
+//            List<NewsResponseDto> naverData = naverNewsFetcher.fetchNaverNews(keywords);
+//            resultData.addAll(naverData.subList(0, Math.min(neededFromNaver, naverData.size())));
+//        }
 
         // ✅ 최대 resultCount(5개) 제한
         if (resultData.size() > resultCount) {

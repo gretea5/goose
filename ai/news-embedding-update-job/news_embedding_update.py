@@ -13,7 +13,7 @@ REFERENCE_NEWS_COLLECTION_NAME = "reference_news"
 NEWS_ARTICLES_COLLECTION_NAME = "news_articles"
 
 CHROMA_HOST = "i12d208.p.ssafy.io"
-CHROMA_PORT = 8000
+CHROMA_PORT = 8001
 
 # 새로 생성할 768차원 ChromaDB 컬렉션명 (v2 명칭 추가)
 REFERENCE_PARAGRAPH_COLLECTION_V2 = "reference_paragraphs_v2"
@@ -32,25 +32,21 @@ news_articles_collection = db[NEWS_ARTICLES_COLLECTION_NAME]
 chroma_client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
 
 reference_paragraph_collection = chroma_client.get_or_create_collection(
-    name=REFERENCE_PARAGRAPH_COLLECTION_V2,
-    dimension=768
+    name=REFERENCE_PARAGRAPH_COLLECTION_V2
 )
 reference_content_collection = chroma_client.get_or_create_collection(
-    name=REFERENCE_CONTENT_COLLECTION_V2,
-    dimension=768
+    name=REFERENCE_CONTENT_COLLECTION_V2
 )
 news_title_collection = chroma_client.get_or_create_collection(
-    name=NEWS_TITLE_COLLECTION_V2,
-    dimension=768
+    name=NEWS_TITLE_COLLECTION_V2
 )
 news_content_collection = chroma_client.get_or_create_collection(
-    name=NEWS_CONTENT_COLLECTION_V2,
-    dimension=768
+    name=NEWS_CONTENT_COLLECTION_V2
 )
 news_paragraph_collection = chroma_client.get_or_create_collection(
-    name=NEWS_PARAGRAPH_COLLECTION_V2,
-    dimension=768
+    name=NEWS_PARAGRAPH_COLLECTION_V2
 )
+
 
 
 def update_reference_news_embeddings():

@@ -2,6 +2,7 @@ package com.ssafy.goose.domain.news.service;
 
 import com.ssafy.goose.domain.news.entity.NewsArticle;
 import com.ssafy.goose.domain.news.entity.ReferenceNewsArticle;
+import com.ssafy.goose.domain.news.service.airate.AiRateService;
 import com.ssafy.goose.domain.news.service.bias.BiasAnalyseService;
 import com.ssafy.goose.domain.news.service.bias.BiasAnalysisResult;
 import com.ssafy.goose.domain.news.service.crawling.NewsContentScraping;
@@ -19,15 +20,18 @@ public class NewsAutoProcessingService {
     private final NewsParagraphSplitService newsParagraphSplitService;
     private final BiasAnalyseService biasAnalyseService;
     private final NewsStorageService newsStorageService;
+    private final AiRateService aiRateService;
 
     public NewsAutoProcessingService(NewsContentScraping newsContentScraping,
                                      NewsParagraphSplitService newsParagraphSplitService,
                                      BiasAnalyseService biasAnalyseService,
-                                     NewsStorageService newsStorageService) {
+                                     NewsStorageService newsStorageService,
+                                     AiRateService aiRateService) {
         this.newsContentScraping = newsContentScraping;
         this.newsParagraphSplitService = newsParagraphSplitService;
         this.biasAnalyseService = biasAnalyseService;
         this.newsStorageService = newsStorageService;
+        this.aiRateService = aiRateService;
     }
 
     /**
@@ -63,7 +67,10 @@ public class NewsAutoProcessingService {
             // 5. 편향성 분석 수행 (문단별 신뢰도/분석 사유 포함)
             BiasAnalysisResult analysisResult = biasAnalyseService.analyzeBias(newsId, cleanTitle, content, paragraphs);
 
-            // 6. MongoDB 저장 객체 생성 (분석 결과 반영)
+            // 6. AI 확률 계산
+            Double aiRate = aiRateService.calculateAiRate(cleanTitle, paragraphs);
+
+            // 7. MongoDB 저장 객체 생성 (분석 결과 반영)
             NewsArticle article = NewsArticle.builder()
                     .id(newsId)
                     .title(cleanTitle)
@@ -79,9 +86,10 @@ public class NewsAutoProcessingService {
                     .reliability(analysisResult.getReliability())
                     .paragraphReliabilities(analysisResult.getParagraphReliabilities())
                     .paragraphReasons(analysisResult.getParagraphReasons())
+                    .aiRate(aiRate)
                     .build();
 
-            // 7. MongoDB에 저장
+            // 8. MongoDB에 저장
             newsStorageService.saveToMongoDB(article);
         }
     }

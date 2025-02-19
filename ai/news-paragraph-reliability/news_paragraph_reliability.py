@@ -25,8 +25,7 @@ chroma_client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
 
 # ✅ 차원을 명시하여 768차원 컬렉션 사용
 reference_paragraph_collection = chroma_client.get_or_create_collection(
-    name=REFERENCE_PARAGRAPH_COLLECTION_NAME,
-    dimension=768
+    name=REFERENCE_PARAGRAPH_COLLECTION_NAME
 )
 
 # 유사도 비교 임계값

@@ -90,7 +90,7 @@ public class UserService {
     // RefreshToken을 사용한 AccessToken 재발급
     public UserResponseDto refreshAccessToken(String refreshToken) {
         if (!jwtTokenProvider.validateToken(refreshToken)) {
-            // ✅ 검증 실패 시 DB에서 삭제하고 에러 반환
+            // 검증 실패 시 DB에서 삭제하고 에러 반환
             User user = userRepository.findByToken(refreshToken).orElse(null);
             if (user != null) {
                 user.setToken(null);
@@ -103,10 +103,33 @@ public class UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        return generateNewTokens(user); // ✅ 동일한 로직으로 토큰 처리
+        return generateNewTokens(user);
     }
 
-    // ✅ AccessToken & RefreshToken을 생성하는 공통 메서드
+    // 회원정보 수정
+    public UserResponseDto updateUser(UpdateUserRequestDto updateRequest, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // newNickname 수정 (중복 체크)
+        if (updateRequest.getNewNickname() != null && !updateRequest.getNewNickname().trim().isEmpty()
+                && !updateRequest.getNewNickname().equals(user.getNickname())) {
+            if (userRepository.findByNickname(updateRequest.getNewNickname()).isPresent()) {
+                return UserResponseDto.error("이미 사용 중인 닉네임입니다.");
+            }
+            user.setNickname(updateRequest.getNewNickname());
+        }
+
+        // newPassword 수정 (암호화 후 저장)
+        if (updateRequest.getNewPassword() != null && !updateRequest.getNewPassword().trim().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(updateRequest.getNewPassword()));
+        }
+
+        userRepository.save(user);
+        return UserResponseDto.success(user.getNickname());
+    }
+
+    // AccessToken & RefreshToken을 생성하는 공통 메서드
     private UserResponseDto generateNewTokens(User user) {
         // createAccessToken() 메서드는 이제 username과 nickname을 모두 받아 토큰에 클레임으로 저장합니다.
         String accessToken = jwtTokenProvider.createAccessToken(user.getUsername(), user.getNickname());
@@ -134,5 +157,18 @@ public class UserService {
         boolean exists = userRepository.findByNickname(nickname).isPresent();
         return exists ? new UserCheckResponseDto(false, "이미 사용 중인 닉네임입니다.")
                 : new UserCheckResponseDto(true, "사용 가능한 닉네임입니다.");
+    }
+
+    public String extractUsername(String authHeader) {
+        if (authHeader == null || authHeader.trim().isEmpty()) {
+            return "guest";
+        }
+        if (authHeader.startsWith("Bearer ")) {
+            authHeader = authHeader.substring(7);
+        }
+        if (!jwtTokenProvider.validateToken(authHeader)) {
+            return "guest";
+        }
+        return jwtTokenProvider.getUsername(authHeader);
     }
 }

@@ -55,4 +55,17 @@ public class UserController {
     public ResponseEntity<UserCheckResponseDto> checkNickname(@RequestParam String nickname) {
         return ResponseEntity.ok(userService.checkNicknameAvailability(nickname));
     }
+
+    @PutMapping("/update")
+    @Operation(summary = "회원정보 수정", description = "로그인 사용자는 닉네임과 비밀번호를 수정할 수 있습니다.")
+    public ResponseEntity<UserResponseDto> updateUser(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @RequestBody UpdateUserRequestDto updateRequest) {
+
+        String username = userService.extractUsername(authHeader);
+        if ("guest".equals(username)) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(userService.updateUser(updateRequest, username));
+    }
 }

@@ -86,7 +86,7 @@ public class NewsAutoProcessingService {
             BiasAnalysisResult analysisResult = biasAnalyseService.analyzeBias(newsId, cleanTitle, content, paragraphs);
 
             // 6. AI 확률 계산
-            Double aiRate = aiRateService.calculateAiRate(cleanTitle, paragraphs);
+            Double aiRate = aiRateService.calculateAiRate(cleanTitle, paragraphs) * 100;
 
             // 7. 언론사 신뢰도 가져오기
             String newsAgency = newsAgencyExtractor.extractNewsAgency(link);
@@ -94,7 +94,7 @@ public class NewsAutoProcessingService {
             int ranking = (agency != null) ? agency.getRanking() : 999; // 없으면 최하위 취급
 
             // 8. 최종 신뢰도 계산
-            Double resultReliability = calculateFinalReliability(analysisResult.getBiasScore(), aiRate, ranking);
+            Double resultReliability = calculateFinalReliability(analysisResult.getBiasScore(), aiRate / 100.0, ranking);
 
             // 9. MongoDB 저장 객체 생성 (분석 결과 반영)
             NewsArticle article = NewsArticle.builder()
@@ -134,8 +134,9 @@ public class NewsAutoProcessingService {
 
         double biasNormalized = biasScore / 100.0;
 
-        return biasNormalized * 0.4 + aiRate * 0.3 + rankingNormalized * 0.3;
+        return (biasNormalized * 0.4 + aiRate * 0.3 + rankingNormalized * 0.3) * 100;
     }
+
 
     public void processAndStoreReferenceNewsArticles(Map<String, Object> newsData) {
         List<Map<String, Object>> newsItems = (List<Map<String, Object>>) newsData.get("items");

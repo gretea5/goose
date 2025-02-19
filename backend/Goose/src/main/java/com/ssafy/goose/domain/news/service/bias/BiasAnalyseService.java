@@ -97,7 +97,8 @@ public class BiasAnalyseService {
                 HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
 
                 ResponseEntity<Map> response = restTemplate.postForEntity(
-                        "http://localhost:5061/get-similar-references",
+                        "http://i12d208.p.ssafy.io:5061/get-similar-references",
+//                        "http://localhost:5061/get-similar-references",
                         requestEntity,
                         Map.class
                 );

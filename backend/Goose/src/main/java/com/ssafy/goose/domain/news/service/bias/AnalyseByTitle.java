@@ -18,8 +18,8 @@ import java.util.concurrent.*;
 @Service
 public class AnalyseByTitle {
     private final RestTemplate restTemplate = new RestTemplate();
-//    private static final String TITLE_COMPARE_CONTENTS_API_URL = "http://i12d208.p.ssafy.io:5062/title-compare-contents";
-    private static final String TITLE_COMPARE_CONTENTS_API_URL = "http://localhost:5062/title-compare-contents";
+    private static final String TITLE_COMPARE_CONTENTS_API_URL = "http://i12d208.p.ssafy.io:5062/title-compare-contents";
+//    private static final String TITLE_COMPARE_CONTENTS_API_URL = "http://localhost:5062/title-compare-contents";
 
     public double checkTitleWithReference(String newsId, List<ReferenceNewsArticle> referenceNewsList) {
         try {

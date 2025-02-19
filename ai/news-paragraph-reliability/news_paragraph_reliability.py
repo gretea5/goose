@@ -13,7 +13,7 @@ app = FastAPI()
 # ✅ GPU 사용 가능 여부 설정
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# ✅ 더 강력한 모델 사용 (MPNet, 768차원)
+# ✅ 더 강력한 목록 사용 (MPNet, 768차원)
 embedding_model = SentenceTransformer("all-mpnet-base-v2", device=device)
 
 # ✅ ChromaDB 연결 정보 (0.4.24 서버 사용)
@@ -28,7 +28,7 @@ reference_paragraph_collection = chroma_client.get_or_create_collection(
 )
 
 # ✅ 유사도 비교 임계값 설정
-SIMILARITY_THRESHOLD = 0.6
+SIMILARITY_THRESHOLD = 0.8
 
 
 class NewsArticle(BaseModel):
@@ -41,86 +41,90 @@ class NewsReliabilityRequest(BaseModel):
     referenceParagraphIds: List[str]
 
 
+# 참고 문단 이본디버거를 획득
 def fetch_reference_embeddings(reference_ids):
-    """레퍼런스 문단 ID 목록을 통해 임베딩 및 문단 텍스트 가져오기"""
     result = reference_paragraph_collection.get(
         ids=reference_ids, include=["documents", "embeddings"]
     )
-
     id_to_embedding = {}
     id_to_text = {}
-
     for i, doc_id in enumerate(result["ids"]):
         id_to_embedding[doc_id] = np.array(result["embeddings"][i])
         id_to_text[doc_id] = result["documents"][i]
-
     return id_to_embedding, id_to_text
 
 
+# 코사인 유사도 계습
 def compute_similarity(embedding1, embedding2):
-    """코사인 유사도 계산"""
     return np.dot(embedding1, embedding2) / (
         np.linalg.norm(embedding1) * np.linalg.norm(embedding2)
     )
 
 
+# 문단 보고 유사도 계산
 def analyze_paragraph(idx, paragraph_embedding, reference_embeddings, reference_texts):
-    """문단별 유사도 분석"""
     best_similarity = -1
     best_reference_id = None
-
     for ref_id, ref_embedding in reference_embeddings.items():
         similarity = compute_similarity(paragraph_embedding, ref_embedding)
         if similarity > best_similarity:
             best_similarity = similarity
             best_reference_id = ref_id
 
-    # ✅ 유사도가 임계값보다 낮으면, 신뢰할 수 있는 문단이 없다고 처리
     if best_similarity < SIMILARITY_THRESHOLD:
         best_reference_text = "신뢰할 수 있는 참고 문단을 찾지 못했습니다."
-        best_similarity = 0.0  # ✅ 안전하게 0.0으로 설정
+        best_similarity = 0.0
     else:
         best_reference_text = reference_texts.get(best_reference_id, "매칭 실패")
 
     return idx, best_reference_text, best_similarity
 
 
+# 문단 필터링 함수 추가
+# 글자수 높은 공고 또는 기자 이름, 예술, 제보 통보들은 제외
+# 복지 하려면 요청해!
+def is_valid_paragraph(paragraph):
+    if len(paragraph.strip()) <= 10:
+        return False
+    lower_p = paragraph.lower()
+    filtering_patterns = [
+        "기자", "촬영", "영상편집", "디자인", "제보", "카카오톡", "ytn",
+        "social@", "메일", "전화", "보도", "연락처", "광고", "구독"
+    ]
+    return not any(pattern in lower_p for pattern in filtering_patterns)
+
+
 @app.post("/news/reliability")
 async def analyze_news_reliability(request: NewsReliabilityRequest):
-    """뉴스 문단 신뢰도 분석 API"""
     title = request.news.title
     news_paragraphs = request.news.paragraphs
     reference_ids = request.referenceParagraphIds
 
     if not news_paragraphs or not reference_ids:
-        return {
-            "paragraph_reliability_scores": [],
-            "best_evidence_paragraphs": [],
-        }
+        return {"paragraph_reliability_scores": [], "best_evidence_paragraphs": []}
 
-    # 1️⃣ 레퍼런스 임베딩 가져오기
     reference_embeddings, reference_texts = fetch_reference_embeddings(reference_ids)
 
-    # 2️⃣ 문단 임베딩 계산 (MPNet 모델 활용)
-    paragraph_embeddings = embedding_model.encode(
-        news_paragraphs, show_progress_bar=False
-    )
+    # 문단 임베딩 계산
+    paragraph_embeddings = embedding_model.encode(news_paragraphs, show_progress_bar=False)
 
-    # 3️⃣ 순차 처리로 신뢰도 및 근거 문단 계산
     best_evidence_paragraphs = []
     reliability_scores = []
 
     for i, paragraph_embedding in enumerate(paragraph_embeddings):
-        _, best_text, similarity = analyze_paragraph(
-            i, paragraph_embedding, reference_embeddings, reference_texts
-        )
-        best_evidence_paragraphs.append(best_text)
-        reliability_scores.append(similarity)
+        # 문단 내용이 부적절하면 필터링 메시지 반환
+        if not is_valid_paragraph(news_paragraphs[i]):
+            best_evidence_paragraphs.append("신뢰할 수 있는 참고 문단을 찾지 못했습니다.")
+            reliability_scores.append(0.0)
+        else:
+            _, best_text, similarity = analyze_paragraph(
+                i, paragraph_embedding, reference_embeddings, reference_texts
+            )
+            best_evidence_paragraphs.append(best_text)
+            reliability_scores.append(similarity)
 
-    return {
-        "paragraph_reliability_scores": reliability_scores,
-        "best_evidence_paragraphs": best_evidence_paragraphs,
-    }
+    return {"paragraph_reliability_scores": reliability_scores, "best_evidence_paragraphs": best_evidence_paragraphs}
+
 
 
 @app.post("/get-similar-references")

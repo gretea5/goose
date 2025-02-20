@@ -34,12 +34,15 @@ public class AutoCrawlingService {
 
             // 2.1. 참고용 뉴스 데이터 먼저 찾아보기
             Map<String, Object> referenceNewsData = newsCrawlerService.getNews(keyword, 20);
+            System.out.println("🔍 가져온 레퍼런스 숫자: " + referenceNewsData.size());
 
             // ✅ 2.2. 참고용 뉴스 저장
             newsAutoProcessingService.processAndStoreReferenceNewsArticles(referenceNewsData);
+            System.out.println("참고용 뉴스 저장 완료");
 
             // 3.1. 키워드로 뉴스 검색해서 가져오기
             Map<String, Object> newsData = newsCrawlerService.getNews(keyword, 7);
+            System.out.println("키워드로 가져온 뉴스 수 : " + newsData.size());
 
             // ✅ 3.2. 뉴스 데이터를 갖고 메인 로직 수행 + 몽고DB 저장
             newsAutoProcessingService.processAndStoreNewsArticles(newsData);

@@ -53,7 +53,7 @@ public class ReferenceNewsCustomRepository {
         query.with(Sort.by(Sort.Order.desc("score")));
 
         // ✅ 최대 5개 제한
-        query.limit(5);
+        query.limit(3);
 
         // ✅ 데이터 조회
         List<ReferenceNewsArticle> mongoData = mongoTemplate.find(query, ReferenceNewsArticle.class, "reference_news");

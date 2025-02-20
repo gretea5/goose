@@ -5,182 +5,182 @@ import schedule
 from pymongo import MongoClient
 from sentence_transformers import SentenceTransformer
 import chromadb
+from chromadb.config import Settings
 import numpy as np
 
+# 환경변수 또는 기본값으로 MongoDB 연결 정보 설정
 MONGO_URI = os.environ.get("MONGO_URI")
 DATABASE_NAME = "goose"
+# MongoDB 컬렉션 이름들
 REFERENCE_NEWS_COLLECTION_NAME = "reference_news"
 NEWS_ARTICLES_COLLECTION_NAME = "news_articles"
 
+# ChromaDB 연결 정보 (내부 포트 8000에서 실행 중)
 CHROMA_HOST = "i12d208.p.ssafy.io"
-CHROMA_PORT = 8001
+CHROMA_PORT = 8000
 
-# 새로 생성할 768차원 ChromaDB 컬렉션명 (v2 명칭 추가)
-REFERENCE_PARAGRAPH_COLLECTION_V2 = "reference_paragraphs_v2"
-REFERENCE_CONTENT_COLLECTION_V2 = "reference_content_v2"
-NEWS_TITLE_COLLECTION_V2 = "news_articles_title_v2"
-NEWS_CONTENT_COLLECTION_V2 = "news_articles_content_v2"
-NEWS_PARAGRAPH_COLLECTION_V2 = "news_articles_paragraphs_v2"
+# ChromaDB 컬렉션 이름들
+REFERENCE_NEWS_CHROMA_COLLECTION_PARAGRAPHS = "reference_paragraphs"
+REFERENCE_NEWS_CHROMA_COLLECTION_CONTENT = "reference_content"
+NEWS_ARTICLES_CHROMA_COLLECTION_TITLE = "news_articles_title"
+NEWS_ARTICLES_CHROMA_COLLECTION_CONTENT = "news_articles_content"
+NEWS_ARTICLES_CHROMA_COLLECTION_PARAGRAPHS = "news_articles_paragraphs"
 
-embedding_model = SentenceTransformer("all-mpnet-base-v2")
+# 임베딩 계산을 위한 SentenceTransformer 모델 로드
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
+# MongoDB 연결
 mongo_client = MongoClient(MONGO_URI)
 db = mongo_client[DATABASE_NAME]
 reference_news_collection = db[REFERENCE_NEWS_COLLECTION_NAME]
 news_articles_collection = db[NEWS_ARTICLES_COLLECTION_NAME]
 
+# ChromaDB 클라이언트 생성 (HTTP 클라이언트를 사용)
 chroma_client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
-
-reference_paragraph_collection = chroma_client.get_or_create_collection(
-    name=REFERENCE_PARAGRAPH_COLLECTION_V2
-)
-reference_content_collection = chroma_client.get_or_create_collection(
-    name=REFERENCE_CONTENT_COLLECTION_V2
-)
-news_title_collection = chroma_client.get_or_create_collection(
-    name=NEWS_TITLE_COLLECTION_V2
-)
-news_content_collection = chroma_client.get_or_create_collection(
-    name=NEWS_CONTENT_COLLECTION_V2
-)
-news_paragraph_collection = chroma_client.get_or_create_collection(
-    name=NEWS_PARAGRAPH_COLLECTION_V2
-)
-
-
+# 참조 뉴스용 컬렉션 생성
+reference_news_chroma_collection_paragraphs = chroma_client.get_or_create_collection(name=REFERENCE_NEWS_CHROMA_COLLECTION_PARAGRAPHS)
+reference_news_chroma_collection_content = chroma_client.get_or_create_collection(name=REFERENCE_NEWS_CHROMA_COLLECTION_CONTENT)
+# 뉴스 기사용 컬렉션 생성
+news_articles_chroma_collection_title = chroma_client.get_or_create_collection(name=NEWS_ARTICLES_CHROMA_COLLECTION_TITLE)
+news_articles_chroma_collection_content = chroma_client.get_or_create_collection(name=NEWS_ARTICLES_CHROMA_COLLECTION_CONTENT)
+news_articles_chroma_collection_paragraphs = chroma_client.get_or_create_collection(name=NEWS_ARTICLES_CHROMA_COLLECTION_PARAGRAPHS)
 
 def update_reference_news_embeddings():
-    print("[INFO] 참조 뉴스 임베딩 업데이트 시작")
-
-    existing_paragraph_data = reference_paragraph_collection.get(include=["documents", "embeddings", "metadatas"])
-    existing_content_data = reference_content_collection.get(include=["documents", "embeddings", "metadatas"])
-
-    existing_paragraph_ids = set(existing_paragraph_data["ids"])
-    existing_content_ids = set(existing_content_data["ids"])
-
-    # 임베딩이 None이거나 누락된 ID 찾기
-    paragraph_ids_to_update = set(
-        doc_id for doc_id, emb in zip(existing_paragraph_data["ids"], existing_paragraph_data["embeddings"]) if emb is None
-    )
-    content_ids_to_update = set(
-        doc_id for doc_id, emb in zip(existing_content_data["ids"], existing_content_data["embeddings"]) if emb is None
-    )
-
-    documents = reference_news_collection.find({})
+    print("=== 참조 뉴스 ChromaDB 임베딩 업데이트 시작 ===")
+    documents = list(reference_news_collection.find({}))
     for doc in documents:
-        news_id = str(doc["_id"])
-        content = doc.get("content", "")
+        news_id = str(doc.get("_id"))
+        title = doc.get("title", "")
+        pubDate = doc.get("pubDate", "")
+        
+        # 1. 문단 임베딩 저장 (참조 뉴스 문단)
         paragraphs = doc.get("paragraphs", [])
-
         for idx, paragraph in enumerate(paragraphs):
+            embedding = embedding_model.encode(paragraph).tolist()
             doc_id = f"{news_id}_p_{idx}"
-            if doc_id not in existing_paragraph_ids or doc_id in paragraph_ids_to_update:
-                embedding = embedding_model.encode(paragraph).tolist()
-                reference_paragraph_collection.upsert(
+            metadata = {
+                "news_id": news_id,
+                "title": title,
+                "pubDate": pubDate,
+                "type": "paragraph"
+            }
+            try:
+                reference_news_chroma_collection_paragraphs.upsert(
                     ids=[doc_id],
                     documents=[paragraph],
                     embeddings=[embedding],
-                    metadatas=[{"news_id": news_id, "type": "paragraph"}]
+                    metadatas=[metadata]
                 )
-
-        if content:
-            content_id = f"{news_id}_content"
-            if content_id not in existing_content_ids or content_id in content_ids_to_update:
-                embedding = embedding_model.encode(content).tolist()
-                reference_content_collection.upsert(
-                    ids=[content_id],
-                    documents=[content],
+            except Exception as e:
+                print(f"참조 뉴스 문단 저장 실패 (doc_id: {doc_id}): {e}")
+        
+        # 2. 전체 기사 내용 임베딩 저장 (참조 뉴스 전체 내용)
+        content_text = doc.get("content", "")
+        if content_text:
+            embedding = embedding_model.encode(content_text).tolist()
+            doc_id = f"{news_id}_full"
+            metadata = {
+                "news_id": news_id,
+                "title": title,
+                "pubDate": pubDate,
+                "type": "full_content"
+            }
+            try:
+                reference_news_chroma_collection_content.upsert(
+                    ids=[doc_id],
+                    documents=[content_text],
                     embeddings=[embedding],
-                    metadatas=[{"news_id": news_id, "type": "content"}]
+                    metadatas=[metadata]
                 )
-
-    print("[INFO] 참조 뉴스 임베딩 업데이트 완료")
-
-
-
-
+            except Exception as e:
+                print(f"참조 뉴스 전체 내용 저장 실패 (doc_id: {doc_id}): {e}")
+    print("=== 참조 뉴스 ChromaDB 임베딩 업데이트 완료 ===")
 
 def update_news_articles_embeddings():
-    print("[INFO] 뉴스 기사 임베딩 업데이트 시작")
-
-    existing_title_data = news_title_collection.get(include=["documents", "embeddings", "metadatas"])
-    existing_content_data = news_content_collection.get(include=["documents", "embeddings", "metadatas"])
-    existing_paragraph_data = news_paragraph_collection.get(include=["documents", "embeddings", "metadatas"])
-
-    existing_title_ids = set(existing_title_data["ids"])
-    existing_content_ids = set(existing_content_data["ids"])
-    existing_paragraph_ids = set(existing_paragraph_data["ids"])
-
-    # 임베딩이 None이거나 누락된 ID 찾기
-    title_ids_to_update = set(
-        doc_id for doc_id, emb in zip(existing_title_data["ids"], existing_title_data["embeddings"]) if emb is None
-    )
-    content_ids_to_update = set(
-        doc_id for doc_id, emb in zip(existing_content_data["ids"], existing_content_data["embeddings"]) if emb is None
-    )
-    paragraph_ids_to_update = set(
-        doc_id for doc_id, emb in zip(existing_paragraph_data["ids"], existing_paragraph_data["embeddings"]) if emb is None
-    )
-
-    documents = news_articles_collection.find({})
+    print("=== 뉴스 기사 ChromaDB 임베딩 업데이트 시작 ===")
+    documents = list(news_articles_collection.find({}))
     for doc in documents:
-        news_id = str(doc["_id"])
+        news_id = str(doc.get("_id"))
         title = doc.get("title", "")
-        content = doc.get("content", "")
-        paragraphs = doc.get("paragraphs", [])
-
+        pubDate = doc.get("pubDate", "")
+        
+        # 1. 제목 임베딩 저장
         if title:
-            title_id = f"{news_id}_title"
-            if title_id not in existing_title_ids or title_id in title_ids_to_update:
-                embedding = embedding_model.encode(title).tolist()
-                news_title_collection.upsert(
-                    ids=[title_id],
+            embedding = embedding_model.encode(title).tolist()
+            doc_id = f"{news_id}_title"
+            metadata = {
+                "news_id": news_id,
+                "title": title,
+                "pubDate": pubDate,
+                "type": "title"
+            }
+            try:
+                news_articles_chroma_collection_title.upsert(
+                    ids=[doc_id],
                     documents=[title],
                     embeddings=[embedding],
-                    metadatas=[{"news_id": news_id, "type": "title"}]
+                    metadatas=[metadata]
                 )
-
-        if content:
-            content_id = f"{news_id}_content"
-            if content_id not in existing_content_ids or content_id in content_ids_to_update:
-                embedding = embedding_model.encode(content).tolist()
-                news_content_collection.upsert(
-                    ids=[content_id],
-                    documents=[content],
+            except Exception as e:
+                print(f"뉴스 기사 제목 저장 실패 (doc_id: {doc_id}): {e}")
+        
+        # 2. 전체 기사 내용 임베딩 저장
+        content_text = doc.get("content", "")
+        if content_text:
+            embedding = embedding_model.encode(content_text).tolist()
+            doc_id = f"{news_id}_content"
+            metadata = {
+                "news_id": news_id,
+                "title": title,
+                "pubDate": pubDate,
+                "type": "content"
+            }
+            try:
+                news_articles_chroma_collection_content.upsert(
+                    ids=[doc_id],
+                    documents=[content_text],
                     embeddings=[embedding],
-                    metadatas=[{"news_id": news_id, "type": "content"}]
+                    metadatas=[metadata]
                 )
-
+            except Exception as e:
+                print(f"뉴스 기사 내용 저장 실패 (doc_id: {doc_id}): {e}")
+        
+        # 3. 문단 임베딩 저장
+        paragraphs = doc.get("paragraphs", [])
         for idx, paragraph in enumerate(paragraphs):
-            paragraph_id = f"{news_id}_p_{idx}"
-            if paragraph_id not in existing_paragraph_ids or paragraph_id in paragraph_ids_to_update:
-                embedding = embedding_model.encode(paragraph).tolist()
-                news_paragraph_collection.upsert(
-                    ids=[paragraph_id],
+            embedding = embedding_model.encode(paragraph).tolist()
+            doc_id = f"{news_id}_p_{idx}"
+            metadata = {
+                "news_id": news_id,
+                "title": title,
+                "pubDate": pubDate,
+                "type": "paragraph"
+            }
+            try:
+                news_articles_chroma_collection_paragraphs.upsert(
+                    ids=[doc_id],
                     documents=[paragraph],
                     embeddings=[embedding],
-                    metadatas=[{"news_id": news_id, "type": "paragraph"}]
+                    metadatas=[metadata]
                 )
+            except Exception as e:
+                print(f"뉴스 기사 문단 저장 실패 (doc_id: {doc_id}): {e}")
+    print("=== 뉴스 기사 ChromaDB 임베딩 업데이트 완료 ===")
 
-    print("[INFO] 뉴스 기사 임베딩 업데이트 완료")
-
-
-
-
-def update_all_embeddings():
+def update_chroma_embeddings():
+    print("=== ChromaDB 전체 임베딩 업데이트 시작 ===")
     update_reference_news_embeddings()
     update_news_articles_embeddings()
-    print("[INFO] 전체 임베딩 업데이트 완료")
-
+    print("=== ChromaDB 전체 임베딩 업데이트 완료 ===")
 
 def job():
-    update_all_embeddings()
-
+    update_chroma_embeddings()
 
 if __name__ == "__main__":
-    job()
+    print("임베딩 업데이트 스케줄러 시작...")
+    job()  # 실행 즉시 한 번 작업 수행
+    # 이후 24시간마다 실행 (필요에 따라 조정 가능)
     schedule.every(24).hours.do(job)
-
     while True:
         schedule.run_pending()
-        time.sleep(60)
+        time.sleep(60)  # 1분마다 스케줄 체크

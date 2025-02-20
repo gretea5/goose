@@ -84,16 +84,17 @@ public class FakeNewsGameResultController {
         FakeNews news = newsOpt.get();
         Boolean correct = requestDto.getUserChoice().equals(news.getCorrectAnswer());
 
-        // 통계 업데이트: 로그인 사용자(guest가 아닌)인 경우에만 업데이트
-        if (!"guest".equals(username)) {
-            fakeNewsService.updateNewsStatistics(newsId, requestDto.getUserChoice(), requestDto.getDwellTime(), nickname);
+        fakeNewsService.updateVoteStatistics(newsId, requestDto.getUserChoice());
+
+        // 정답일 때만 체류시간 랭킹 업데이트 (로그인 사용자에 한해)
+        if (!"guest".equals(username) && correct) {
+            fakeNewsService.updateRanking(newsId, requestDto.getDwellTime(), nickname);
         }
 
         // 게임 결과를 MySQL에 저장 (guest 사용자도 저장하지만 통계 업데이트는 하지 않음)
         FakeNewsGameResult savedResult = gameResultService.saveGameResult(username, newsId, requestDto.getUserChoice(),
                 correct, requestDto.getDwellTime());
 
-        // 응답 DTO 매핑: 여기서 nickname은 JWT 토큰에서 추출한 nickname 사용
         FakeNewsGameResultResponseDto responseDto = new FakeNewsGameResultResponseDto();
         responseDto.setId(savedResult.getId());
         responseDto.setNickname(nickname);

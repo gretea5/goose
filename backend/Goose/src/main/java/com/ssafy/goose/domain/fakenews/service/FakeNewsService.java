@@ -44,7 +44,8 @@ public class FakeNewsService {
         return allNews.get(index);
     }
 
-    public void updateNewsStatistics(String newsId, String userChoice, long dwellTime, String nickname) {
+    // 투표수와 선택 비율 업데이트 (정답 여부 상관없이 업데이트)
+    public void updateVoteStatistics(String newsId, String userChoice) {
         Optional<FakeNews> optionalNews = fakeNewsRepository.findById(newsId);
         if (!optionalNews.isPresent()) {
             return;
@@ -60,13 +61,22 @@ public class FakeNewsService {
         Map<String, Double> percentages = new HashMap<>();
         for (Map.Entry<String, Integer> entry : votes.entrySet()) {
             double value = (entry.getValue() * 100.0) / totalVotes;
-            // 소수점 첫째자리 반올림
-            double roundedValue = Math.round(value * 10) / 10.0;
+            double roundedValue = Math.round(value * 10) / 10.0; // 소수점 첫째자리 반올림
             percentages.put(entry.getKey(), roundedValue);
         }
         news.setSelectionPercentages(percentages);
 
-        // 체류시간 랭킹 업데이트 (낮은 시간이 우수)
+        fakeNewsRepository.save(news);
+        log.info("Updated vote statistics for newsId {} with choice {}", newsId, userChoice);
+    }
+
+    // 정답인 경우에만 체류시간 랭킹 업데이트 (정답: correct==true)
+    public void updateRanking(String newsId, long dwellTime, String nickname) {
+        Optional<FakeNews> optionalNews = fakeNewsRepository.findById(newsId);
+        if (!optionalNews.isPresent()) {
+            return;
+        }
+        FakeNews news = optionalNews.get();
         List<FakeNews.Ranking> rankings = news.getDwellTimeRanking();
         if (rankings == null) {
             rankings = new ArrayList<>();
@@ -74,7 +84,6 @@ public class FakeNewsService {
         if (rankings.size() < 3) {
             rankings.add(new FakeNews.Ranking(nickname, dwellTime));
         } else {
-            // Top3 중 가장 높은 체류시간(최악)과 비교
             Optional<FakeNews.Ranking> worstOpt = rankings.stream()
                     .max(Comparator.comparingLong(FakeNews.Ranking::getDwellTime));
             if (worstOpt.isPresent() && dwellTime < worstOpt.get().getDwellTime()) {
@@ -82,11 +91,9 @@ public class FakeNewsService {
                 rankings.add(new FakeNews.Ranking(nickname, dwellTime));
             }
         }
-        // 낮은 순으로 정렬 후 저장
         rankings.sort(Comparator.comparingLong(FakeNews.Ranking::getDwellTime));
         news.setDwellTimeRanking(rankings);
-
         fakeNewsRepository.save(news);
-        log.info("Updated statistics for newsId {} with choice {} and dwellTime {}", newsId, userChoice, dwellTime);
+        log.info("Updated ranking for newsId {} with dwellTime {} by {}", newsId, dwellTime, nickname);
     }
 }

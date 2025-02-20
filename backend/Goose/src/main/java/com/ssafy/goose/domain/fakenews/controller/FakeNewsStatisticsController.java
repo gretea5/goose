@@ -159,16 +159,21 @@ public class FakeNewsStatisticsController {
 
         // 회원가입 날짜 한국 시간(UTC+9)으로 변환
         LocalDateTime registrationDate = Instant.ofEpochSecond(user.getCreatedAt())
-                .atZone(ZoneId.of("UTC")) // 먼저 UTC 기준으로 변환
-                .withZoneSameInstant(ZoneId.of("Asia/Seoul")) // 한국 시간으로 변환
-                .toLocalDateTime();
+                .atZone(ZoneId.of("UTC"))
+                .withZoneSameInstant(ZoneId.of("Asia/Seoul"))
+                .toLocalDateTime()
+                .minusDays(1);
 
         // 전체 게임 결과 조회 (MySQL)
         List<FakeNewsGameResult> results = gameResultRepository.findByUsername(username);
 
-        // 회원가입 이후의 게임 기록만
+        // solvedAt을 UTC+9로 변환 후 비교하도록 수정
         List<FakeNewsGameResult> filteredResults = results.stream()
-                .filter(r -> !r.getSolvedAt().isBefore(registrationDate))
+                .filter(r -> !r.getSolvedAt()
+                        .atZone(ZoneOffset.UTC)
+                        .withZoneSameInstant(ZoneOffset.ofHours(9))
+                        .toLocalDateTime()
+                        .isBefore(registrationDate))
                 .collect(Collectors.toList());
 
         // 전체 통계 (전체 게임 수, 맞춘 게임 수, 정답률)

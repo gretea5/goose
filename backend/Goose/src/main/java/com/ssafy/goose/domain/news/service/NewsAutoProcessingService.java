@@ -87,6 +87,7 @@ public class NewsAutoProcessingService {
 
             // 6. AI 확률 계산
             Double aiRate = aiRateService.calculateAiRate(cleanTitle, paragraphs) * 100;
+//            Double aiRate = Math.random() * 20.0;
 
             // 7. 언론사 신뢰도 가져오기
             String newsAgency = newsAgencyExtractor.extractNewsAgency(link);

@@ -1,9 +1,8 @@
 package com.ssafy.goose.domain.news.scheduler;
 
 import com.ssafy.goose.domain.news.service.NewsAutoProcessingService;
-import com.ssafy.goose.domain.news.service.crawling.NewsCrawlerService;
 import com.ssafy.goose.domain.news.service.NewsStorageService;
-import org.springframework.scheduling.annotation.Scheduled;
+import com.ssafy.goose.domain.news.service.crawling.NewsCrawlerService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,7 +21,7 @@ public class AutoCrawlingService {
         this.newsAutoProcessingService = newsAutoProcessingService;
     }
 
-    @Scheduled(cron = "0 0 0,6,12,18 * * *", zone = "Asia/Seoul")
+//    @Scheduled(cron = "0 0 0,6,12,18 * * *", zone = "Asia/Seoul")
     public void fetchAndSaveTrendingNews() {
         System.out.println("🕒 뉴스 크롤링 실행: " + LocalDateTime.now());
 

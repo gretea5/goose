@@ -15,8 +15,8 @@ import java.util.Map;
 public class AnalyzeParagraph {
 
     // ✅ FastAPI 서버 URL (EC2 배포 시 주소 변경 필요)
-//    private static final String FASTAPI_URL = "http://i12d208.p.ssafy.io:5061/news/reliability";
-    private static final String FASTAPI_URL = "http://localhost:5061/news/reliability";
+    private static final String FASTAPI_URL = "http://i12d208.p.ssafy.io:5061/news/reliability";
+//    private static final String FASTAPI_URL = "http://localhost:5061/news/reliability";
     private final RestTemplate restTemplate;
 
     public AnalyzeParagraph() {

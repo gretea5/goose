@@ -67,7 +67,6 @@ public class FakeNewsService {
         news.setSelectionPercentages(percentages);
 
         fakeNewsRepository.save(news);
-        log.info("Updated vote statistics for newsId {} with choice {}", newsId, userChoice);
     }
 
     // 정답인 경우에만 체류시간 랭킹 업데이트 (정답: correct==true)
@@ -94,6 +93,5 @@ public class FakeNewsService {
         rankings.sort(Comparator.comparingLong(FakeNews.Ranking::getDwellTime));
         news.setDwellTimeRanking(rankings);
         fakeNewsRepository.save(news);
-        log.info("Updated ranking for newsId {} with dwellTime {} by {}", newsId, dwellTime, nickname);
     }
 }

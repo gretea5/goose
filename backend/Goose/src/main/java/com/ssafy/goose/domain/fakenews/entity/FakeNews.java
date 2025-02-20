@@ -17,6 +17,8 @@ public class FakeNews {
     private String content;              // 뉴스 내용 (800자 이상)
     private String fakeReason;           // 정답인 이유 (ex. "이 기사가 과장 보도인 이유는 …")
     private String correctAnswer;        // 정답: "허위정보", "과장보도", "클릭베이트"
+    private String imageUrl;             // 관련 이미지 URL
+    private String newsDate;             // 뉴스 날짜
 
     private Map<String, Integer> voteCounts = new HashMap<>();          // 각 선택지 별 투표수
     private Map<String, Double> selectionPercentages = new HashMap<>(); // 선택지 별 비율

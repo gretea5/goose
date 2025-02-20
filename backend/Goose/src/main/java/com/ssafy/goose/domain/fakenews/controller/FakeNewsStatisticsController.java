@@ -165,16 +165,16 @@ public class FakeNewsStatisticsController {
         // 전체 게임 결과 조회 (MySQL)
         List<FakeNewsGameResult> results = gameResultRepository.findByUsername(username);
 
+        // 회원가입 이후의 게임 기록만
+        List<FakeNewsGameResult> filteredResults = results.stream()
+                .filter(r -> !r.getSolvedAt().isBefore(registrationDate))
+                .collect(Collectors.toList());
+
         // 전체 통계 (전체 게임 수, 맞춘 게임 수, 정답률)
         int totalQuestions = results.size();
         int correctCount = (int) results.stream().filter(FakeNewsGameResult::getCorrect).count();
         double overallRate = totalQuestions > 0 ? ((double) correctCount / totalQuestions) * 100 : 0;
         overallRate = Math.floor(overallRate); // 소수점 없이 정수 처리
-
-        // 회원가입 이후의 게임 기록만
-        List<FakeNewsGameResult> filteredResults = results.stream()
-                .filter(r -> !r.getSolvedAt().isBefore(registrationDate))
-                .collect(Collectors.toList());
 
         // 게임 기록 그룹화
         Map<YearMonth, List<FakeNewsGameResult>> grouped = filteredResults.stream()

@@ -14,9 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.time.YearMonth;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -160,7 +158,10 @@ public class FakeNewsStatisticsController {
         }
 
         // 회원가입 날짜 한국 시간(UTC+9)으로 변환
-        LocalDateTime registrationDate = LocalDateTime.ofEpochSecond(user.getCreatedAt(), 0, ZoneOffset.ofHours(9));
+        LocalDateTime registrationDate = Instant.ofEpochSecond(user.getCreatedAt())
+                .atZone(ZoneId.of("UTC")) // 먼저 UTC 기준으로 변환
+                .withZoneSameInstant(ZoneId.of("Asia/Seoul")) // 한국 시간으로 변환
+                .toLocalDateTime();
 
         // 전체 게임 결과 조회 (MySQL)
         List<FakeNewsGameResult> results = gameResultRepository.findByUsername(username);

@@ -4,6 +4,7 @@ import com.ssafy.goose.domain.fakenews.entity.FakeNewsGameResult;
 import com.ssafy.goose.domain.fakenews.repository.jpa.FakeNewsGameResultRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +18,7 @@ public class FakeNewsGameResultService {
         this.gameResultRepository = gameResultRepository;
     }
 
+    @Transactional
     // 게임 결과를 저장하고 반환
     public FakeNewsGameResult saveGameResult(String username, String newsId, String userChoice,
                                              Boolean correct, long dwellTime) {

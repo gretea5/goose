@@ -174,7 +174,7 @@ public class FakeNewsStatisticsController {
         int totalQuestions = results.size();
         int correctCount = (int) results.stream().filter(FakeNewsGameResult::getCorrect).count();
         double overallRate = totalQuestions > 0 ? ((double) correctCount / totalQuestions) * 100 : 0;
-        overallRate = Math.floor(overallRate); // 소수점 없이 정수 처리
+        overallRate = Math.round(overallRate); // 소수점 없이 정수 처리
 
         // 게임 기록 그룹화
         Map<YearMonth, List<FakeNewsGameResult>> grouped = filteredResults.stream()

@@ -1,0 +1,28 @@
+EXP_NAME: FNDNet
+SEED: 223
+    
+MODE:
+    save_list:
+        - train
+        - validation
+        - test
+
+DATASET:
+    name: FNDNet
+    data_path: ../data/Part1 # news article directory
+    saved_data_path: false
+    PARAMETERS:
+        max_word_len: 1000
+
+TOKENIZER: 
+    name: mecab
+    vocab_path: /word-embeddings/glove/glove.txt
+    max_vocab_size: 50000  
+    
+TRAIN:
+    batch_size: 32
+    num_workers: 4
+
+RESULT:
+    savedir: ../data/Part1
+    dataname: 'FNDNet_w1000'

@@ -86,42 +86,42 @@ AI 모델을 활용하여 가짜 뉴스 문장을 학습하고,
 
  ## 📌 주요 기능
 
-### 1️⃣ <b>로그인 페이지</b>
-> 로그인 페이지
+### 1️⃣ <b>메인 페이지</b>
+> 메인 페이지
 
-|                     **Splash Page**                      |                        **Login Page**                        |                       **Search Page**                        |
+|                     **Splash Page**                      |                        **Home Page**                        |                       **Search Page**                        |
 | :-----------------------------------------------------: | :---------------------------------------------------------: | :--------------------------------------------------------: |
-| <img src="./assets/gif/splash.gif" height="400"> | <img src="./assets/gif/login.gif" height="400"> | <img src="./assets/gif/search.gif" height="400"> |
+| <img src="./assets/gif/splash.gif" height="400"> | <img src="./assets/gif/home.gif" height="400"> | <img src="./assets/gif/search.gif" height="400"> |
 
 <br>
 
-### 2️⃣ <b>검색 페이지</b>
+### 2️⃣ <b>분석 페이지</b>
 
-> 검색 페이지
+> 분석 페이지
 
-|                      **Check Page**                      |                      **Check Page**                      |                       **Check Page**                      |
+|                      **Image Check**                      |                      **URL Check**                      |                       **Live Cam Check**                      |
 | :--------------------------------------------------------: | :---------------------------------------------------------: | :---------------------------------------------------------: |
-| <img src="./assets/gif/live_camera.gif" height="400"> | <img src="./assets/gif/url_analy.gif" height="400"> | <img src="./assets/gif/image_analy.gif" height="400"> |
+| <img src="./assets/gif/image_analy.gif" height="400"> | <img src="./assets/gif/url_analy.gif" height="400"> | <img src="./assets/gif/live_camera.gif" height="400"> |
 
 <br>
 
-### 3️⃣ <b>판별 페이지</b>
-
-> 판별 페이지
-
-|                      **My Analy Page**                      |                      **Game Page**                      |                       **Profile edit Page**                      |
-| :--------------------------------------------------------: | :---------------------------------------------------------: | :---------------------------------------------------------: |
-| <img src="./assets/gif/my_analy.gif" height="400"> | <img src="./assets/gif/game.gif" height="400"> | <img src="./assets/gif/profile_edit.gif" height="400"> |
-
-<br>
-
-### 4️⃣ <b>게임 페이지</b>
+### 3️⃣ <b>게임 페이지</b>
 
 > 게임 페이지
 
-|                      **Logout Page**                      |                      **Home Page**                      |                 
+|                      **Game Page**                      |
+| :--------------------------------------------------------: | :---------------------------------------------------------: | :---------------------------------------------------------: |
+| <img src="./assets/gif/game.gif" height="400"> |
+
+<br>
+
+### 4️⃣ <b>마이 페이지</b>
+
+> 마이 페이지
+
+|                      **My Analy Page**                      |                      **Profile Edit Page**                      |                 
 | :--------------------------------------------------------: | :---------------------------------------------------------: |
-| <img src="./assets/gif/logout.gif" height="400"> | <img src="./assets/gif/home.gif" height="400"> | 
+| <img src="./assets/gif/my-analy.web" height="400"> | <img src="./assets/gif/profile_edit.gif" height="400"> | 
 
 <br>
 

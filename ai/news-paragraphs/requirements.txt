@@ -1,0 +1,9 @@
+fastapi==0.110.0
+uvicorn==0.29.0
+torch
+transformers==4.35.2  # 🚀 호환 가능한 안정적인 버전
+sentence-transformers==2.2.2
+numpy==1.26.2
+scikit-learn==1.4.1.post1
+soynlp==0.0.493
+huggingface_hub==0.16.4  # 🚀 최신 버전과 호환

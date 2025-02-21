@@ -1,0 +1,35 @@
+EXP_NAME: BERT
+SEED: 223
+
+MODE:
+    do_train: False
+    do_test: True
+    test_list:
+        - train
+        - validation
+        - test
+    
+DATASET:
+    name: BTS
+    data_path: ../data/Part2
+    PARAMETERS:
+        max_word_len: 512
+        window_size: 1
+
+MODEL:
+    modelname: bts
+    PARAMETERS:
+        finetune_bert: True
+    CHECKPOINT:
+        checkpoint_path: /saved_model/Part2/BERT/best_model.pt
+
+TRAIN:
+    batch_size: 64
+    num_workers: 12
+
+LOG:
+    log_interval: 1
+
+RESULT:
+    savedir: '/saved_model/Part2'
+    result_name: results

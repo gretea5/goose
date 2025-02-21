@@ -1,0 +1,29 @@
+EXP_NAME: HAND
+SEED: 223
+
+MODE:
+    save_list:
+        - train
+        - validation
+        - test
+
+DATASET:
+    name: HAND
+    data_path: ../data/Part1 # news article directory
+    saved_data_path: false
+    PARAMETERS:  
+        max_sent_len: 16
+        max_word_len: 64
+
+TOKENIZER: 
+    name: mecab
+    vocab_path: /word-embeddings/glove/glove.txt
+    max_vocab_size: 50000  
+
+TRAIN:
+    batch_size: 32
+    num_workers: 4
+
+RESULT:
+    savedir: ../data/Part1
+    dataname: 'HAND_s16_w64'

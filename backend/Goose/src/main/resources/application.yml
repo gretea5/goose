@@ -1,0 +1,16 @@
+spring:
+  profiles:
+    active: dev # 기본 활성화 프로파일 설정
+  jpa:
+    open-in-view: false # OSIV 비활성화 (성능 최적화)
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 20MB
+  messages:
+    basename: messages
+server:
+  port: 8080
+  servlet:
+    context-path: /

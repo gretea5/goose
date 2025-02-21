@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.newsresult.NewsResultFragment">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_news_result"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_scrollFlags="scroll"
+        app:navigationIcon="@drawable/btn_close" />
+
+    <TextView
+        android:id="@+id/tv_news_result_title"
+        style="@style/Widget.TextView.Header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/news_check_result_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_news_result" />
+
+    <ImageView
+        android:id="@+id/iv_speech_bubble"
+        android:layout_width="130dp"
+        android:layout_height="110dp"
+        android:layout_marginStart="95dp"
+        android:layout_marginBottom="104dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_speech_bubble"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_news_result_goose"
+        app:layout_constraintStart_toStartOf="@+id/iv_news_result_goose" />
+
+    <TextView
+        android:id="@+id/tv_bubble_truth"
+        style="@style/Widget.TextView.Header.Regular"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="20dp"
+        android:padding="12dp"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_speech_bubble"
+        app:layout_constraintEnd_toEndOf="@+id/iv_speech_bubble"
+        app:layout_constraintStart_toStartOf="@+id/iv_speech_bubble"
+        app:layout_constraintTop_toTopOf="@+id/iv_speech_bubble"
+        tools:text="해당 기사의\n신뢰도는\n30%입니다." />
+
+    <ImageView
+        android:id="@+id/iv_road"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_marginTop="135dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_road"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/iv_news_result_goose" />
+
+    <ImageView
+        android:id="@+id/iv_news_result_goose"
+        android:layout_width="140dp"
+        android:layout_height="180dp"
+        android:layout_marginTop="60dp"
+        android:src="@drawable/ic_goose_check_result"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_news_result_title" />
+
+    <TextView
+        android:id="@+id/tv_check_content"
+        style="@style/Widget.TextView.Header.Regular"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_24dp"
+        android:background="@drawable/bg_white_8dp"
+        android:paddingHorizontal="@dimen/spacing_16dp"
+        android:paddingVertical="@dimen/spacing_36dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iv_road"
+        tools:text="해당 기사는 편향된 정보를 담고 있으며 과장된 내용이 포함된 기사입니다." />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_percent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_24dp"
+        android:layout_marginTop="@dimen/spacing_24dp"
+        android:background="@drawable/bg_white_8dp"
+        android:paddingHorizontal="@dimen/spacing_24dp"
+        android:paddingVertical="@dimen/spacing_16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.333"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_check_content">
+
+        <TextView
+            android:id="@+id/tv_truth"
+            style="@style/Widget.TextView.Rate.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/truth"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/pb_truth"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="@dimen/spacing_16dp"
+            android:layout_marginVertical="4dp"
+            android:max="100"
+            android:progressDrawable="@drawable/bg_progress_bar_truth"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_truth"
+            app:layout_constraintEnd_toStartOf="@+id/tv_percent_truth"
+            app:layout_constraintHorizontal_bias="0.481"
+            app:layout_constraintStart_toEndOf="@+id/tv_truth"
+            app:layout_constraintTop_toTopOf="@+id/tv_truth" />
+
+        <TextView
+            android:id="@+id/tv_percent_truth"
+            style="@style/Widget.TextView.Rate.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_truth"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_truth"
+            tools:text="80%" />
+
+        <TextView
+            android:id="@+id/tv_ai_whether"
+            style="@style/Widget.TextView.Rate.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_8dp"
+            android:text="@string/ai_whether"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_truth" />
+
+        <ProgressBar
+            android:id="@+id/pb_ai"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginVertical="4dp"
+            android:progressDrawable="@drawable/bg_progress_bar_ai"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_ai_whether"
+            app:layout_constraintEnd_toEndOf="@+id/pb_truth"
+            app:layout_constraintStart_toStartOf="@+id/pb_truth"
+            app:layout_constraintTop_toTopOf="@+id/tv_ai_whether" />
+
+        <TextView
+            android:id="@+id/tv_ai_whether_percent"
+            style="@style/Widget.TextView.Rate.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_ai_whether"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_ai_whether"
+            tools:text="100%" />
+
+        <TextView
+            android:id="@+id/tv_bias"
+            style="@style/Widget.TextView.Rate.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_8dp"
+            android:text="@string/bias"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_ai_whether" />
+
+        <ProgressBar
+            android:id="@+id/pb_bias"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginVertical="4dp"
+            android:progressDrawable="@drawable/bg_progress_bar_bias"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_bias"
+            app:layout_constraintEnd_toEndOf="@+id/pb_ai"
+            app:layout_constraintStart_toStartOf="@+id/pb_ai"
+            app:layout_constraintTop_toTopOf="@+id/tv_bias" />
+
+        <TextView
+            android:id="@+id/tv_bias_percent"
+            style="@style/Widget.TextView.Rate.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_bias"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_bias"
+            tools:text="100%" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_button_area"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_24dp"
+        android:layout_marginTop="@dimen/spacing_24dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@+id/cl_percent">
+
+        <Button
+            android:id="@+id/btn_other_check"
+            style="@style/Widget.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/other_check" />
+
+        <View
+            android:layout_width="@dimen/spacing_8dp"
+            android:layout_height="0dp" />
+
+        <Button
+            android:id="@+id/btn_check_detail"
+            style="@style/Widget.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/detail" />
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_news_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="tv_news_result_title,iv_speech_bubble,tv_bubble_truth,iv_road,iv_news_result_goose,tv_check_content,cl_percent,ll_button_area" />
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lav_loading_animation"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toTopOf="@+id/tv_loading"
+        app:layout_constraintDimensionRatio="1:0.5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/loading" />
+
+    <TextView
+        android:id="@+id/tv_loading"
+        style="@style/Widget.TextView.Loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/analysis_loading"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lav_loading_animation" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="lav_loading_animation,tv_loading" />
+
+    <ImageView
+        android:id="@+id/iv_null"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/ic_logout"
+        app:layout_constraintBottom_toTopOf="@id/tv_null"
+        app:layout_constraintDimensionRatio="1:0.4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <TextView
+        android:id="@+id/tv_null"
+        style="@style/Widget.TextView.Loading.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_24dp"
+        android:text="@string/url_error"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/iv_null" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_null"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="iv_null,tv_null" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,89 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.2'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.ssafy'
+version = '0.0.1-SNAPSHOT'
+
+jar {
+	enabled = false
+}
+
+bootJar {
+	archiveFileName = 'goose-0.0.1-SNAPSHOT.jar'
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// ✅ Spring Boot Starter Dependencies
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb' // ✅ MongoDB 지원
+
+	// ✅ Spring Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	// ✅ SpringDoc for API Documentation (Swagger UI)
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+
+	// ✅ Lombok for reducing boilerplate code
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// ✅ Development Tools
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// ✅ HTML 태그 제거 및 HTML 엔터티 변환 (Jsoup & Apache Commons Text)
+	implementation 'org.jsoup:jsoup:1.15.3'               // ✅ HTML 파싱 및 태그 제거
+	implementation 'org.apache.commons:commons-text:1.10.0' // ✅ HTML 엔터티 변환
+
+	// ✅ REST API 요청 시 JSON 처리 (Jackson)
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
+
+	// ✅ org.json 의존성 추가. 파이썬 키워드 추출 후 JSON 파싱 시 사용.
+	implementation 'org.json:json:20231013'
+
+	// ✅ JWT 관련 의존성 (JJWT 라이브러리)
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	// ✅ Jsoup 추가 (HTML 파싱 및 크롤링)
+	implementation 'org.jsoup:jsoup:1.15.3'
+
+	// ✅ JUnit 5 (테스트 실행)
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'  // 버전 명확히 지정
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// ✅ Mockito (Mock 객체 사용)
+	testImplementation 'org.mockito:mockito-core:5.4.0'
+	testImplementation 'org.mockito:mockito-junit-jupiter:5.4.0' // JUnit5와 호환되는 Mockito 버전
+
+	// ✅ Spring Boot Test
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// WebClient
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

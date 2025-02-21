@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:id="@+id/sv_check"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/btn_check"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_fragment_title"
+                style="@style/Widget.TextView.Header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="66dp"
+                android:text="@string/check_news_title"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_subtitle"
+                style="@style/Widget.TextView.Caption.Silver"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_8dp"
+                android:gravity="center"
+                android:text="@string/check_news_subtitle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_fragment_title" />
+
+            <TextView
+                android:id="@+id/tv_check_type_title"
+                style="@style/Widget.TextView.Header.Secondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_24dp"
+                android:layout_marginTop="@dimen/spacing_36dp"
+                android:text="@string/check_title_type"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_subtitle" />
+
+            <TextView
+                android:id="@+id/tv_check_type_subtitle"
+                style="@style/Widget.TextView.Caption.Silver"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_24dp"
+                android:layout_marginTop="1dp"
+                android:text="@string/check_subtitle_type"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_check_type_title" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_check_type"
+                style="?attr/textInputOutlinedExposedDropdownMenuStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_24dp"
+                android:layout_marginTop="@dimen/spacing_16dp"
+                app:boxStrokeColor="@color/black"
+                app:boxStrokeWidth="2dp"
+                app:hintEnabled="false"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_check_type_subtitle">
+
+                <AutoCompleteTextView
+                    android:id="@+id/actv_check_type"
+                    style="@style/Widget.TextView.Body.Medium"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_white_4dp"
+                    android:dropDownHeight="150dp"
+                    android:text="@string/image"
+                    android:inputType="none" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/tv_content_input_title"
+                style="@style/Widget.TextView.Header.Secondary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_24dp"
+                android:layout_marginTop="@dimen/spacing_24dp"
+                android:text="@string/content_input_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/til_check_type" />
+
+            <TextView
+                android:id="@+id/tv_content_input_subtitle"
+                style="@style/Widget.TextView.Caption.Silver"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_24dp"
+                android:layout_marginTop="1dp"
+                android:text="@string/content_input_subtitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_content_input_title" />
+
+            <ImageView
+                android:id="@+id/iv_camera"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/spacing_24dp"
+                android:src="@drawable/ic_camera"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/tv_content_input_subtitle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tv_content_input_title"
+                app:tint="@color/black" />
+
+            <ImageView
+                android:id="@+id/iv_add_image"
+                android:src="@drawable/bg_white_15dp"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginHorizontal="@dimen/spacing_24dp"
+                android:layout_marginTop="@dimen/spacing_16dp"
+                android:scaleType="fitXY"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.25"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_content_input_subtitle" />
+
+            <ImageView
+                android:id="@+id/iv_add_image_plus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_add_img_plus"
+                app:layout_constraintBottom_toBottomOf="@id/iv_add_image"
+                app:layout_constraintEnd_toEndOf="@id/iv_add_image"
+                app:layout_constraintStart_toStartOf="@id/iv_add_image"
+                app:layout_constraintTop_toTopOf="@id/iv_add_image" />
+
+            <TextView
+                android:id="@+id/tv_add_image_check_info"
+                style="@style/Widget.TextView.Caption.Silver"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@+id/til_extract_text_input"
+                app:layout_constraintTop_toTopOf="@+id/btn_add_image_check"
+                app:layout_constraintBottom_toBottomOf="@id/btn_add_image_check"
+                android:text="@string/spell_check_info" />
+
+            <Button
+                android:id="@+id/btn_add_image_check"
+                style="@style/Widget.Button.Spell"
+                android:layout_width="70dp"
+                android:layout_height="35dp"
+                android:layout_marginTop="@dimen/spacing_8dp"
+                app:layout_constraintEnd_toEndOf="@+id/til_extract_text_input"
+                app:layout_constraintTop_toBottomOf="@+id/til_extract_text_input"
+                android:text="@string/spell_check"/>
+
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/group_add_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:constraint_referenced_ids="iv_add_image,iv_add_image_plus,til_extract_text_input,tv_add_image_check_info,btn_add_image_check"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_content_input"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginHorizontal="@dimen/spacing_24dp"
+                android:layout_marginTop="@dimen/spacing_8dp"
+                android:hint="@string/content_input_hint"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.3"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_content_input_subtitle">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/tie_content_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="top"
+                    android:inputType="textMultiLine" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/tv_content_spell_check_info"
+                style="@style/Widget.TextView.Caption.Silver"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@+id/til_content_input"
+                app:layout_constraintTop_toTopOf="@+id/btn_content_spell_check"
+                app:layout_constraintBottom_toBottomOf="@id/btn_content_spell_check"
+                android:text="@string/spell_check_info" />
+
+            <Button
+                android:id="@+id/btn_content_spell_check"
+                style="@style/Widget.Button.Spell"
+                android:layout_width="70dp"
+                android:layout_height="35dp"
+                android:layout_marginTop="@dimen/spacing_8dp"
+                app:layout_constraintEnd_toEndOf="@+id/til_content_input"
+                app:layout_constraintTop_toBottomOf="@+id/til_content_input"
+                android:text="@string/spell_check"/>
+
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/group_content_area"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:constraint_referenced_ids="til_content_input,tv_content_spell_check_info,btn_content_spell_check,iv_camera"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_url_input"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginHorizontal="@dimen/spacing_24dp"
+                android:layout_marginTop="@dimen/spacing_8dp"
+                android:hint="@string/url_input_hint"
+                android:visibility="gone"
+                app:endIconMode="custom"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.13"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_content_input_subtitle">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/tie_url_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="text" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_extract_text_input"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginHorizontal="@dimen/spacing_24dp"
+                android:layout_marginTop="@dimen/spacing_8dp"
+                android:hint="@string/content_input_hint"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.25"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/iv_add_image">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/tie_extract_text_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="top"
+                    android:overScrollMode="always"
+                    android:scrollbars="vertical"
+                    android:inputType="textMultiLine" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btn_check"
+        style="@style/Widget.Button.Primary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_24dp"
+        android:text="@string/check"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sv_check" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

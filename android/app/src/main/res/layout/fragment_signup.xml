@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".ui.signup.SignupFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/spacing_24dp"
+        android:paddingBottom="@dimen/spacing_24dp">
+
+        <ImageView
+            android:id="@+id/iv_signup_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_24dp"
+            android:src="@drawable/btn_close"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_sign_up_title"
+            style="@style/Widget.TextView.Header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_24dp"
+            android:text="@string/user_signup"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/iv_signup_close" />
+
+        <TextView
+            android:id="@+id/tv_id_title"
+            style="@style/Widget.TextView.Caption.GraniteGray"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_16dp"
+            android:text="@string/user_id"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_sign_up_title" />
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_signup_id_input"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/spacing_8dp"
+            app:boxBackgroundColor="@color/lightSilver"
+            app:boxStrokeWidth="0dp"
+            app:endIconMode="clear_text"
+            app:endIconTint="@color/philippineGray"
+            app:hintEnabled="false"
+            app:layout_constraintHeight_percent="0.08"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_id_title"
+            app:layout_constraintWidth_percent="0.65">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/tie_signup_id_input"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_bright_gray_10dp"
+                android:fontFamily="@font/spoqahansansneo_medium"
+                android:hint="@string/user_id"
+                android:inputType="text" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/btn_check_id"
+            style="@style/Widget.Button.Secondary"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="@dimen/spacing_16dp"
+            android:enabled="false"
+            android:text="@string/user_duplicate_check"
+            app:layout_constraintBottom_toBottomOf="@+id/til_signup_id_input"
+            app:layout_constraintHeight_percent="0.08"
+            app:layout_constraintStart_toEndOf="@+id/til_signup_id_input"
+            app:layout_constraintTop_toTopOf="@+id/til_signup_id_input"
+            app:layout_constraintWidth_percent="0.3" />
+
+        <TextView
+            android:id="@+id/tv_id_input_meta_info"
+            style="@style/Widget.TextView.Meta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_8dp"
+            android:layout_marginTop="@dimen/spacing_8dp"
+            android:textColor="@color/maximumRed"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/til_signup_id_input"
+            tools:text="@string/user_limit_message" />
+
+        <TextView
+            android:id="@+id/tv_pw_title"
+            style="@style/Widget.TextView.Caption.GraniteGray"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="64dp"
+            android:text="@string/user_password"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/til_signup_id_input" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_signup_pw_input"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/spacing_8dp"
+            app:boxBackgroundColor="@color/lightSilver"
+            app:boxStrokeWidth="0dp"
+            app:endIconMode="password_toggle"
+            app:endIconTint="@color/philippineGray"
+            app:hintEnabled="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.08"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_pw_title">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/tie_signup_pw_input"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_bright_gray_10dp"
+                android:fontFamily="@font/spoqahansansneo_medium"
+                android:hint="@string/user_password"
+                android:inputType="textPassword" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_signup_pw_check_input"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/spacing_8dp"
+            app:boxBackgroundColor="@color/lightSilver"
+            app:boxStrokeWidth="0dp"
+            app:endIconMode="password_toggle"
+            app:endIconTint="@color/philippineGray"
+            app:hintEnabled="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.08"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/til_signup_pw_input">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/tie_signup_pw_check_input"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_bright_gray_10dp"
+                android:fontFamily="@font/spoqahansansneo_medium"
+                android:hint="@string/user_password_check"
+                android:inputType="textPassword" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/tv_pw_meta_info"
+            style="@style/Widget.TextView.Meta"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/til_signup_pw_check_input"
+            tools:text="@string/user_limit_message" />
+
+        <TextView
+            android:id="@+id/tv_nickname"
+            style="@style/Widget.TextView.Caption.GraniteGray"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="64dp"
+            android:text="@string/user_nickname"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/til_signup_pw_check_input" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_signup_nickname_input"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/spacing_8dp"
+            app:boxBackgroundColor="@color/lightSilver"
+            app:boxStrokeWidth="0dp"
+            app:endIconMode="clear_text"
+            app:endIconTint="@color/philippineGray"
+            app:hintEnabled="false"
+            app:layout_constraintHeight_percent="0.08"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_nickname"
+            app:layout_constraintWidth_percent="0.65">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/tie_signup_nickname_input"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_bright_gray_10dp"
+                android:fontFamily="@font/spoqahansansneo_medium"
+                android:hint="@string/user_nickname"
+                android:inputType="text" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/btn_check_nickname"
+            style="@style/Widget.Button.Secondary"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="@dimen/spacing_16dp"
+            android:enabled="false"
+            android:text="@string/user_duplicate_check"
+            app:layout_constraintBottom_toBottomOf="@+id/til_signup_nickname_input"
+            app:layout_constraintHeight_percent="0.08"
+            app:layout_constraintStart_toEndOf="@+id/til_signup_nickname_input"
+            app:layout_constraintTop_toTopOf="@+id/til_signup_nickname_input"
+            app:layout_constraintWidth_percent="0.3" />
+
+        <TextView
+            android:id="@+id/tv_nickname_meta_info"
+            style="@style/Widget.TextView.Meta"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/til_signup_nickname_input"
+            tools:text="@string/user_limit_message" />
+
+        <Button
+            android:id="@+id/btn_signup"
+            style="@style/Widget.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="72dp"
+            android:enabled="false"
+            android:text="@string/user_do_signup"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/til_signup_nickname_input" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

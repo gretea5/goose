@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/white"
+            app:layout_scrollFlags="scroll"
+            app:navigationIcon="@drawable/btn_arrow_left" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/spacing_24dp">
+
+            <TextView
+                android:id="@+id/tv_header"
+                style="@style/Widget.TextView.Header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_16dp"
+                android:text="@string/game_start"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/iv"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="43dp"
+                android:contentDescription="@string/news_img"
+                app:layout_constraintDimensionRatio="1:0.72"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_header"
+                tools:src="@tools:sample/backgrounds/scenic" />
+
+            <TextView
+                android:id="@+id/tv_title"
+                style="@style/Widget.TextView.Title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_24dp"
+                android:layout_marginTop="@dimen/spacing_24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/iv"
+                tools:text="슈퍼스타 강인혁, 열애" />
+
+            <TextView
+                android:id="@+id/tv_date"
+                style="@style/Widget.TextView.Date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_24dp"
+                android:layout_marginTop="@dimen/spacing_8dp"
+                app:layout_constraintBottom_toTopOf="@+id/view_line"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_title"
+                tools:text="2025.01.27" />
+
+            <View
+                android:id="@+id/view_line"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="@dimen/spacing_16dp"
+                android:background="@color/platinum"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_date" />
+
+            <TextView
+                android:id="@+id/tv_body"
+                style="@style/Widget.TextView.Body"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_24dp"
+                android:layout_marginTop="19dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/view_line"
+                tools:text="연어초밥을 먹고 샤브샤브를 먹고 아이스 아메리카노를 마시고 디저트 케이크도 먹고 맛있는 걸 많이 먹으면 좋겠네요. 이게 밑으로 길어져야 하고 위로는 고정이 되어야 이거네요 찾았습니다.
+약간의 퀴즈 진행을 위해 열심히 문장을 써보고 있습니다.\n\n 연어초밥을 먹고 샤브샤브를 먹고 아이스 아메리카노를 마시고 디저트 케이크도 먹고 맛있는 걸 많이 먹으면 좋겠네요. 이게 밑으로 길어져야 하고 위로는 고정이 되어야 이거네요 찾았습니다.
+약간의 퀴즈 진행을 위해 열심히 문장을 써보고 있습니다.\n\n 연어초밥을 먹고 샤브샤브를 먹고 아이스 아메리카노를 마시고 디저트 케이크도 먹고 맛있는 걸 많이 먹으면 좋겠네요. 이게 밑으로 길어져야 하고 위로는 고정이 되어야 이거네요 찾았습니다.
+약간의 퀴즈 진행을 위해 열심히 문장을 써보고 있습니다.\n\n 연어초밥을 먹고 샤브샤브를 먹고 아이스 아메리카노를 마시고 디저트 케이크도 먹고 맛있는 걸 많이 먹으면 좋겠네요. 이게 밑으로 길어져야 하고 위로는 고정이 되어야 이거네요 찾았습니다.
+약간의 퀴즈 진행을 위해 열심히 문장을 써보고 있습니다.\n\n 연어초밥을 먹고 샤브샤브를 먹고 아이스 아메리카노를 마시고 디저트 케이크도 먹고 맛있는 걸 많이 먹으면 좋겠네요. 이게 밑으로 길어져야 하고 위로는 고정이 되어야 이거네요 찾았습니다.
+약간의 퀴즈 진행을 위해 열심히 문장을 써보고 있습니다.\n\n 연어초밥을 먹고 샤브샤브를 먹고 아이스 아메리카노를 마시고 디저트 케이크도 먹고 맛있는 걸 많이 먹으면 좋겠네요. 이게 밑으로 길어져야 하고 위로는 고정이 되어야 이거네요 찾았습니다.
+약간의 퀴즈 진행을 위해 열심히 문장을 써보고 있습니다. " />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="@dimen/spacing_16dp"
+        android:contentDescription="@string/answer_selection_button"
+        android:src="@drawable/ic_game"
+        app:backgroundTint="@color/primary"
+        app:tint="@color/white" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

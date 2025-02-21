@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/spacing_16dp"
+    android:background="@drawable/bg_white_8dp">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cv_item_news_image"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintDimensionRatio="1:1">
+
+        <ImageView
+            android:id="@+id/iv_news_img"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            tools:src="@tools:sample/avatars"
+            tools:targetApi="s" />
+
+    </androidx.cardview.widget.CardView>
+
+
+<!--    <ImageView-->
+<!--        android:id="@+id/iv_news_img"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:background="@drawable/bg_radius_20dp"-->
+<!--        android:clipToOutline="true"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintDimensionRatio="1:1"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        android:scaleType="centerCrop"-->
+<!--        tools:src="@tools:sample/avatars"-->
+<!--        tools:targetApi="s" />-->
+
+    <TextView
+        android:id="@+id/tv_date"
+        style="@style/Widget.TextView.Date.Item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_16dp"
+        android:layout_marginTop="@dimen/spacing_12dp"
+        app:layout_constraintBottom_toTopOf="@id/tv_title"
+        app:layout_constraintStart_toEndOf="@id/cv_item_news_image"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_goneMarginTop="@dimen/spacing_12dp"
+        tools:text="25-01-28" />
+
+    <TextView
+        android:id="@+id/tv_title"
+        style="@style/Widget.TextView.Caption.Bold"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="@dimen/spacing_16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:layout_constraintBottom_toTopOf="@id/tv_summary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/tv_date"
+        app:layout_constraintTop_toBottomOf="@id/tv_date"
+        tools:text="산타클로스 염색 소식을 여러분들은 알고 계신가요?" />
+
+    <TextView
+        android:id="@+id/tv_summary"
+        style="@style/Widget.TextView.Body.small"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_8dp"
+        android:layout_marginEnd="@dimen/spacing_16dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        app:layout_constraintBottom_toTopOf="@id/tv_truth_percent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/tv_date"
+        app:layout_constraintTop_toBottomOf="@id/tv_title"
+        tools:text="크리스마스 시즌 지나면 자유롭게 염색하며 지낸다는 내용을 아시나요? 어쩌고 저쩌고 크리스마스 시즌 지나면 자유롭게 염색하며 지낸다는 내용을 아시나요? 어쩌고 저쩌고" />
+
+    <TextView
+        android:id="@+id/tv_truth_percent"
+        style="@style/Widget.TextView.Body.truth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_8dp"
+        android:layout_marginBottom="@dimen/spacing_12dp"
+        android:background="@drawable/bg_lavender_blue_8dp"
+        android:padding="@dimen/spacing_8dp"
+        android:textColor="@color/plumpPurple"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/tv_date"
+        app:layout_constraintTop_toBottomOf="@id/tv_summary"
+        app:layout_goneMarginBottom="@dimen/spacing_12dp"
+        tools:text="진실 80%" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

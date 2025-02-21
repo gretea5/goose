@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base Style -->
+    <style name="Widget.TextView" parent="@android:style/Widget.DeviceDefault.TextView">
+        <item name="android:fontFamily">@font/spoqahansansneo_regular</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="Widget.Button" parent="@android:style/Widget.DeviceDefault.Button.Borderless">
+        <item name="android:fontFamily">@font/spoqahansansneo_bold</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:background">@drawable/bg_primary_12dp</item>
+        <item name="android:padding">@dimen/spacing_12dp</item>
+    </style>
+
+    <style name="Widget.EditText" parent="@android:style/Widget.DeviceDefault.EditText">
+        <item name="android:fontFamily">@font/spoqahansansneo_regular</item>
+    </style>
+
+    <style name="Widget.RadioButton" parent="@android:style/Widget.DeviceDefault.CompoundButton.RadioButton">
+        <item name="android:fontFamily">@font/spoqahansansneo_regular</item>
+    </style>
+
+    <style name="Widget.CheckBox" parent="@android:style/Widget.DeviceDefault.CompoundButton.CheckBox">
+        <item name="android:fontFamily">@font/spoqahansansneo_regular</item>
+    </style>
+
+    <!-- TextView Style -->
+    <style name="Widget.TextView.Header">
+        <item name="android:textSize">24sp</item>
+        <item name="android:letterSpacing">-0.06</item>
+        <item name="android:fontFamily">@font/spoqahansansneo_bold</item>
+    </style>
+
+    <style name="Widget.TextView.Header.Medium">
+        <item name="android:fontFamily">@font/spoqahansansneo_medium</item>
+    </style>
+
+    <style name="Widget.TextView.Header.Regular">
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">@font/spoqahansansneo_regular</item>
+    </style>
+
+    <style name="Widget.TextView.Header.Secondary">
+        <item name="android:textSize">18sp</item>
+        <item name="android:letterSpacing">-0.025</item>
+    </style>
+
+    <style name="Widget.TextView.Header.Percent">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="Widget.TextView.Title">
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">@font/spoqahansansneo_medium</item>
+    </style>
+
+    <style name="Widget.TextView.Title.NEWS">
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">@font/spoqahansansneo_medium</item>
+    </style>
+
+    <style name="Widget.TextView.Caption">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Widget.TextView.Caption.Bold">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/spoqahansansneo_medium</item>
+    </style>
+
+    <style name="Widget.TextView.Caption.Silver">
+        <item name="android:textColor">@color/sonicSilver</item>
+    </style>
+
+    <style name="Widget.TextView.Caption.GraniteGray">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/graniteGray</item>
+        <item name="android:fontFamily">@font/spoqahansansneo_bold</item>
+    </style>
+
+    <style name="Widget.TextView.Meta">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/maximumRed</item>
+        <item name="android:letterSpacing">-0.06</item>
+        <item name="android:lineSpacingMultiplier">1.3</item>
+        <item name="android:layout_marginStart">@dimen/spacing_8dp</item>
+        <item name="android:layout_marginTop">@dimen/spacing_8dp</item>
+    </style>
+
+    <style name="Widget.TextView.Date">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/sonicSilver</item>
+        <item name="android:fontFamily">@font/spoqahansansneo_medium</item>
+    </style>
+
+    <style name="Widget.TextView.Date.Item">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="Widget.TextView.Body">
+        <item name="android:textSize">16sp</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
+        <item name="android:fontFamily">@font/spoqahansansneo_regular</item>
+    </style>
+
+    <style name="Widget.TextView.Body.small">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="Widget.TextView.Body.truth">
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">@font/spoqahansansneo_bold</item>
+    </style>
+
+    <style name="Widget.TextView.Body.Medium">
+        <item name="android:fontFamily">@font/spoqahansansneo_medium</item>
+    </style>
+
+    <style name="Widget.TextView.Body.Regular">
+        <item name="android:fontFamily">@font/spoqahansansneo_regular</item>
+    </style>
+
+    <style name="Widget.TextView.Profile">
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">"@font/spoqahansansneo_bold"</item>
+    </style>
+
+    <style name="Widget.TextView.Mypage">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:background">@drawable/bg_white_15dp</item>
+        <item name="android:padding">@dimen/spacing_16dp</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:paddingStart">@dimen/spacing_24dp</item>
+        <item name="android:gravity">start</item>
+    </style>
+
+    <style name="Widget.TextView.Rate">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="Widget.TextView.Rate.Title">
+        <item name="android:fontFamily">@font/spoqahansansneo_medium</item>
+    </style>
+
+    <style name="Widget.TextView.Rate.Percent">
+        <item name="android:fontFamily">@font/spoqahansansneo_regular</item>
+    </style>
+
+    <style name="Widget.TextView.Rate.Item">
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">@font/spoqahansansneo_medium</item>
+    </style>
+
+    <style name="Widget.TextView.Loading">
+        <item name="android:textSize">28sp</item>
+        <item name="android:fontFamily">@font/spoqahansansneo_bold</item>
+    </style>
+
+    <style name="Widget.TextView.Loading.Small">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <!-- Button Style -->
+    <style name="Widget.Button.Primary">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="Widget.Button.Secondary">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="Widget.Button.Spell">
+        <item name="android:textSize">12sp</item>
+        <item name="android:padding">0dp</item>
+    </style>
+</resources>

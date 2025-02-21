@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+torch
+transformers
+spacy==3.5.3
+thinc>=8.1.8,<8.2.0
+numpy==1.23.5
+
+# ✅ NLP 관련 추가 패키지
+nltk  # 영어 불용어 처리 및 토큰화
+konlpy  # 한국어 형태소 분석 (Okt 사용)
+krwordrank  # TextRank 기반 키워드 추출
+scikit-learn  # TF-IDF 기반 불용어 처리
+soynlp  # 한국어 불용어 추가 가능

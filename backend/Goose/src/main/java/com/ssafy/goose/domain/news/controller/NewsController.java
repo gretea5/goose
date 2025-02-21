@@ -39,6 +39,7 @@ public class NewsController {
         return ResponseEntity.ok(newsService.searchNews(keyword));
     }
 
+
     @Operation(summary = "뉴스 상세 조회", description = "newsId에 해당하는 뉴스를 조회합니다.")
     @GetMapping("/{newsId}")
     public ResponseEntity<NewsArticleDto> getNewsById(

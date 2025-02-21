@@ -20,4 +20,7 @@ public interface NewsRepository extends MongoRepository<NewsArticle, String> {
 
     // 제목에서 정규식을 사용하여 특정 단어 포함된 뉴스 조회
     List<NewsArticle> findByTitleRegex(String regex);
+
+    // 🔹 최신순으로 상위 10개 뉴스 조회
+    List<NewsArticle> findTop10ByOrderByExtractedAtDesc();
 }

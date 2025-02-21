@@ -5,7 +5,7 @@ pipeline {
         DOCKER_IMAGE = credentials('DOCKER_IMAGE')
         DOCKER_CONTAINER = credentials('DOCKER_CONTAINER')
         DOCKER_PORT = credentials('DOCKER_PORT')
-        DOCKER_PATH = '/home/ubuntu/docker' // EC2 서버의 Docker 저장 경로
+        DOCKER_PATH = credentials('DOCKER_PATH')
 
         EC2_USER = credentials('EC2_USER')
         EC2_IP = credentials('EC2_IP')
@@ -15,6 +15,17 @@ pipeline {
         DB_URL = credentials('DB_URL')
         DB_USERNAME = credentials('DB_USERNAME')
         DB_PASSWORD = credentials('DB_PASSWORD')
+
+        // ✅ MongoDB 환경 변수 추가
+        MONGO_URI = credentials('MONGO_URI')
+        MONGO_DATABASE = credentials('MONGO_DATABASE')
+
+        // ✅ Naver API 키 추가
+        NAVER_CLIENT_ID = credentials('NAVER_CLIENT_ID')
+        NAVER_CLIENT_SECRET = credentials('NAVER_CLIENT_SECRET')
+
+        // JWT 인증 키 추가
+        JWT_SECRET = credentials('JWT_SECRET')
 
         JAVA_HOME = '/opt/java/openjdk'
         GRADLE_HOME = '/opt/gradle/gradle-8.5'
@@ -35,6 +46,17 @@ pipeline {
                     credentialsId: 'GitLab-PAT'
             }
         }
+
+        // ✅ 환경 변수 값 확인을 위한 스테이지 추가
+        stage('Check Environment Variables') {
+            steps {
+                echo 'Checking environment variables in Jenkins...'
+                sh 'echo "JWT_SECRET: $JWT_SECRET"'
+                sh 'docker info'
+                sh 'docker ps'
+            }
+        }
+
         stage('Build Application') {
             steps {
                 echo 'Building the application with Gradle Wrapper...'
@@ -92,6 +114,11 @@ pipeline {
                                       -e DB_URL=${DB_URL} \
                                       -e DB_USERNAME=${DB_USERNAME} \
                                       -e DB_PASSWORD=${DB_PASSWORD} \
+                                      -e MONGO_URI=${MONGO_URI} \
+                                      -e MONGO_DATABASE=${MONGO_DATABASE} \
+                                      -e NAVER_CLIENT_ID=${NAVER_CLIENT_ID} \
+                                      -e NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET} \
+                                      -e JWT_SECRET="${JWT_SECRET}" \
                                       ${DOCKER_IMAGE}:latest
                                 """.stripIndent()
                             )

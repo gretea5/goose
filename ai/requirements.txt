@@ -1,0 +1,16 @@
+fastapi
+pydantic
+requests
+beautifulsoup4
+torch
+torchvision
+torchaudio
+transformers
+numpy
+kss
+scikit-learn
+sentencepiece
+huggingface-hub
+sentence-transformers
+uvicorn
+soynlp

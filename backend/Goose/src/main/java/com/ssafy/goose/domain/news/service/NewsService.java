@@ -35,9 +35,9 @@ public class NewsService {
         return NewsArticleDto.fromEntity(savedArticle);
     }
 
-    // 뉴스 리스트 조회
+    // 🔹 최신순으로 상위 10개 뉴스 리스트 조회
     public List<NewsArticleDto> getNewsList() {
-        return newsRepository.findAll()
+        return newsRepository.findTop10ByOrderByExtractedAtDesc()
                 .stream()
                 .map(NewsArticleDto::fromEntity)
                 .collect(Collectors.toList());
@@ -48,13 +48,21 @@ public class NewsService {
         String regexPattern = ".*" + keyword + ".*";  // MongoDB 정규식 패턴 적용
         return newsRepository.findByTitleRegex(regexPattern)
                 .stream()
-                .map(NewsArticleDto::fromEntity)
+                .map(article -> {
+                    NewsArticleDto dto = NewsArticleDto.fromEntity(article);
+                    dto.getPubDateTimestamp();
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
-
     // 뉴스 상세 조회
     public Optional<NewsArticleDto> getNewsById(String newsId) {
-        return newsRepository.findById(newsId).map(NewsArticleDto::fromEntity);
+        return newsRepository.findById(newsId)
+                .map(article -> {
+                    NewsArticleDto dto = NewsArticleDto.fromEntity(article);
+                    dto.getPubDateTimestamp();
+                    return dto;
+                });
     }
 }

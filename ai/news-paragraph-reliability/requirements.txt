@@ -1,0 +1,12 @@
+fastapi==0.110.0
+uvicorn==0.29.0
+sentence-transformers==2.2.2
+numpy==1.26.2
+scikit-learn==1.4.1.post1
+pydantic==2.7.1  # 최신 v2 사용
+pydantic-settings==2.1.0  # 안정적으로 사용되는 버전
+huggingface_hub==0.14.1
+torch  # 🚀 sentence-transformers에서 모델 로드 시 필요
+openai==0.27.0
+chromadb==0.6.3
+PyYAML>=6.0.1

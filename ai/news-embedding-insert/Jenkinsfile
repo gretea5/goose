@@ -1,0 +1,90 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = 'news_embedding_insert'
+        DOCKER_CONTAINER = 'news_embedding_insert-container'
+        DOCKER_PORT = '5063'
+        DOCKER_PATH = credentials('DOCKER_PATH')
+
+        EC2_USER = credentials('EC2_USER')
+        EC2_IP = credentials('EC2_IP')
+        SSH_KEY = credentials('SSH_KEY')
+
+        PYTHON_VERSION = '3.9'
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                echo 'Cloning the repository...'
+                git branch: 'backend',
+                    url: 'https://lab.ssafy.com/s12-webmobile4-sub1/S12P11D208.git',
+                    credentialsId: 'GitLab-PAT'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                echo 'Building the Docker image...'
+                dir('ai/news-embedding-insert') {
+                    sh 'docker build -t ${DOCKER_IMAGE}:latest .'
+                }
+            }
+        }
+
+        stage('Save and Transfer Docker Image') {
+            steps {
+                echo 'Saving and transferring Docker image to EC2...'
+                sh "docker save ${DOCKER_IMAGE}:latest | gzip > news_embedding_insert.tar.gz"
+
+                sshPublisher(publishers: [
+                    sshPublisherDesc(
+                        configName: 'EC2-Server',
+                        transfers: [
+                            sshTransfer(
+                                sourceFiles: 'news_embedding_insert.tar.gz',
+                            )
+                        ]
+                    )
+                ])
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                echo 'Deploying FastAPI application on EC2...'
+                sshPublisher(publishers: [
+                    sshPublisherDesc(
+                        configName: 'EC2-Server',
+                        transfers: [
+                            sshTransfer(
+                                execCommand: """
+                                    mkdir -p ${DOCKER_PATH}
+                                    docker stop ${DOCKER_CONTAINER} || true
+                                    docker rm ${DOCKER_CONTAINER} || true
+                                    docker rmi ${DOCKER_IMAGE}:latest || true
+                                    docker load < ${DOCKER_PATH}/news_embedding_insert.tar.gz
+                                    docker run -d --name ${DOCKER_CONTAINER} -p ${DOCKER_PORT}:${DOCKER_PORT} ${DOCKER_IMAGE}:latest
+                                """.stripIndent()
+                            )
+                        ]
+                    )
+                ])
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Cleaning workspace...'
+            cleanWs()
+        }
+        success {
+            echo '✅ FastAPI Deployment successful!'
+        }
+        failure {
+            echo '❌ FastAPI Deployment failed.'
+        }
+    }
+}

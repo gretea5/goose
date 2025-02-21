@@ -131,7 +131,7 @@ AI 모델을 활용하여 가짜 뉴스 문장을 학습하고,
 
 |                      **My Analy Page**                      |                      **Profile Edit Page**                      |                 
 | :--------------------------------------------------------: | :---------------------------------------------------------: |
-| <img src="./assets/gif/my-analy.gif" height="400"> | <img src="./assets/gif/profile_edit.gif" height="400"> | 
+| <img src="./assets/gif/my_analy.gif" height="400"> | <img src="./assets/gif/profile_edit.gif" height="400"> | 
 <br>
 
 

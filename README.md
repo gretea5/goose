@@ -99,8 +99,7 @@ AI 모델을 활용하여 가짜 뉴스 문장을 학습하고,
 
 > 로그인 페이지
 
-|                      **Login Page**                      |                      **Logout Page**                      
-|
+|                      **Login Page**                      |                      **Logout Page**                      |                 
 | :--------------------------------------------------------: | :---------------------------------------------------------: |
 | <img src="./assets/gif/login.gif" height="400"> | <img src="./assets/gif/logout.gif" height="400"> |
 

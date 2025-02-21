@@ -1,30 +1,27 @@
 package com.ssafy.firstproject.util
 
-import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
 object CommonUtils {
-
-    //날짜 포맷 출력
-    fun dateformatYMDHM(time: Date): String {
-        val format = SimpleDateFormat("yyyy.MM.dd. HH:mm", Locale.KOREA)
-        format.timeZone = TimeZone.getTimeZone("Asia/Seoul")
-        return format.format(time)
+    fun formatDateYYMMDD(millis: Long): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        return sdf.format(Date(millis))
     }
 
-    fun dateformatYMD(time: Date): String {
-        val format = SimpleDateFormat("yyyy.MM.dd", Locale.KOREA)
-        format.timeZone = TimeZone.getTimeZone("Asia/Seoul")
-        return format.format(time)
-    }
+    fun convertPubDateToFormattedDate(pubDate: String): String {
+        // 원본 pubDate의 형식
+        val inputFormat = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH)
+        // 원하는 출력 형식
+        val outputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.KOREAN)
 
-    //천단위 콤마
-    fun makeComma(num: Int): String {
-        val comma = DecimalFormat("#,###")
-        return "${comma.format(num)}원"
-    }
+        // 시간대 설정
+        inputFormat.timeZone = TimeZone.getTimeZone("GMT+9") // 한국 시간대 적용
 
+        // 변환
+        val date = inputFormat.parse(pubDate)
+        return outputFormat.format(date!!)
+    }
 }

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:paddingHorizontal="@dimen/spacing_24dp"
+    android:paddingBottom="@dimen/spacing_24dp"
+    tools:context=".ui.profileedit.ProfileEditFragment">
+
+    <ImageView
+        android:id="@+id/iv_edit_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_24dp"
+        android:src="@drawable/btn_close"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_edit_title"
+        style="@style/Widget.TextView.Header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_24dp"
+        android:text="@string/user_profile_edit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iv_edit_close" />
+
+
+    <TextView
+        android:id="@+id/tv_edit_pw_title"
+        style="@style/Widget.TextView.Caption.GraniteGray"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_48dp"
+        android:text="@string/user_new_password"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_edit_title" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_edit_pw_input"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/spacing_8dp"
+        app:boxBackgroundColor="@color/lightSilver"
+        app:boxStrokeWidth="0dp"
+        app:endIconMode="password_toggle"
+        app:endIconTint="@color/philippineGray"
+        app:hintEnabled="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.08"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_edit_pw_title">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/tie_edit_pw_input"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_bright_gray_10dp"
+            android:fontFamily="@font/spoqahansansneo_medium"
+            android:hint="@string/user_password"
+            android:inputType="textPassword" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_edit_pw_check_input"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/spacing_8dp"
+        app:boxBackgroundColor="@color/lightSilver"
+        app:boxStrokeWidth="0dp"
+        app:endIconMode="password_toggle"
+        app:endIconTint="@color/philippineGray"
+        app:hintEnabled="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.08"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/til_edit_pw_input">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/tie_edit_pw_check_input"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_bright_gray_10dp"
+            android:fontFamily="@font/spoqahansansneo_medium"
+            android:hint="@string/user_password_check"
+            android:inputType="textPassword" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/tv_edit_pw_meta_info"
+        style="@style/Widget.TextView.Meta"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_8dp"
+        android:text="@string/user_limit_message"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/til_edit_pw_check_input" />
+
+    <TextView
+        android:id="@+id/tv_edit_nickname"
+        style="@style/Widget.TextView.Caption.GraniteGray"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_48dp"
+        android:text="@string/user_new_nickname"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/til_edit_pw_check_input" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_edit_nickname_input"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/spacing_8dp"
+        app:boxBackgroundColor="@color/lightSilver"
+        app:boxStrokeWidth="0dp"
+        app:endIconMode="clear_text"
+        app:endIconTint="@color/philippineGray"
+        app:hintEnabled="false"
+        app:layout_constraintHeight_percent="0.08"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_edit_nickname"
+        app:layout_constraintWidth_percent="0.65">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/tie_edit_nickname_input"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_bright_gray_10dp"
+            android:fontFamily="@font/spoqahansansneo_medium"
+            android:hint="@string/user_nickname"
+            android:inputType="text" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/btn_edit_check_nickname"
+        style="@style/Widget.Button.Primary"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/spacing_16dp"
+        android:text="@string/user_duplicate_check"
+        app:layout_constraintBottom_toBottomOf="@+id/til_edit_nickname_input"
+        app:layout_constraintHeight_percent="0.08"
+        app:layout_constraintStart_toEndOf="@+id/til_edit_nickname_input"
+        app:layout_constraintTop_toTopOf="@+id/til_edit_nickname_input"
+        app:layout_constraintWidth_percent="0.3" />
+
+    <TextView
+        android:id="@+id/tv_edit_nickname_meta_info"
+        style="@style/Widget.TextView.Meta"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_8dp"
+        android:text="@string/user_limit_message"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/til_edit_nickname_input" />
+
+    <Button
+        android:id="@+id/btn_edit"
+        style="@style/Widget.Button.Primary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/spacing_24dp"
+        android:text="@string/user_do_edit"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

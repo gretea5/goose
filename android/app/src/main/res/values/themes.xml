@@ -1,8 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.FirstProject" parent="Theme.Material3.DayNight.NoActionBar">
+        <!--custom font-family 적용-->
+        <item name="android:textViewStyle">@style/Widget.TextView</item>
+        <item name="android:buttonStyle">@style/Widget.Button</item>
+        <item name="android:editTextStyle">@style/Widget.EditText</item>
+        <item name="android:radioButtonStyle">@style/Widget.RadioButton</item>
+        <item name="android:checkboxStyle">@style/Widget.CheckBox</item>
+
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowIsTranslucent">true</item>
     </style>
 
     <style name="Theme.FirstProject" parent="Base.Theme.FirstProject" />

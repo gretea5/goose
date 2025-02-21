@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.newslistresult.NewsListResultFragment">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_news_list_result"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_scrollFlags="scroll"
+        app:navigationIcon="@drawable/btn_close" />
+
+    <TextView
+        android:id="@+id/tv_news_result_fragment_title"
+        style="@style/Widget.TextView.Header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_36dp"
+        android:text="@string/news_check_result_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_news_list_result" />
+
+    <TextView
+        android:id="@+id/tv_news_result_subtitle"
+        style="@style/Widget.TextView.Caption.Silver"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:gravity="center"
+        android:text="@string/news_check_result_subtitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_news_result_fragment_title" />
+
+    <TextView
+        android:id="@+id/tv_analogy_title"
+        style="@style/Widget.TextView.Header.Secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_24dp"
+        android:layout_marginTop="@dimen/spacing_36dp"
+        android:text="@string/similar_news"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_news_result_subtitle" />
+
+    <TextView
+        android:id="@+id/tv_analogy_subtitle"
+        style="@style/Widget.TextView.Caption.Silver"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_24dp"
+        android:layout_marginTop="1dp"
+        android:text="@string/check_subtitle_type"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_analogy_title" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_news_result"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/spacing_24dp"
+        android:layout_marginTop="@dimen/spacing_8dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_analogy_subtitle"
+        tools:listitem="@layout/item_news" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_news_list_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="tv_news_result_fragment_title,tv_news_result_subtitle,tv_analogy_title,tv_analogy_subtitle,rv_news_result" />
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lav_loading_animation"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/loading"
+        app:layout_constraintDimensionRatio="1:0.5"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/tv_loading" />
+
+    <TextView
+        android:id="@+id/tv_loading"
+        style="@style/Widget.TextView.Loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/analysis_loading"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lav_loading_animation"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

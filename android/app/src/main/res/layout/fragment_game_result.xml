@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/lavender">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/btn_arrow_left" />
+
+    <ImageView
+        android:id="@+id/iv_answer"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        tools:src="@drawable/ic_grinning_face" />
+
+    <TextView
+        android:id="@+id/tv_answer_result"
+        style="@style/Widget.TextView.Header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/iv_answer"
+        tools:text="정답은 이건 진짜임ㅇㅇ" />
+
+    <TextView
+        android:id="@+id/tv_answer_result_description"
+        style="@style/Widget.TextView.Header.Medium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_answer_result"
+        tools:text="@string/result_correct_answer" />
+
+    <TextView
+        android:id="@+id/tv_my_answer"
+        style="@style/Widget.TextView.Body"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_48dp"
+        android:layout_marginTop="@dimen/spacing_8dp"
+        android:background="@drawable/bg_cornflowerblue17_8dp"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_answer_result_description"
+        tools:text="내 선택 : 이건 진짜임 ㅇㅇ" />
+
+    <TextView
+        android:id="@+id/tv_time_ranking"
+        style="@style/Widget.TextView.Header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_24dp"
+        android:layout_marginTop="@dimen/spacing_24dp"
+        android:text="@string/time_spent_ranking"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_my_answer" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_ranking"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_24dp"
+        android:layout_marginTop="@dimen/spacing_8dp"
+        android:background="@drawable/bg_white_15dp"
+        android:padding="@dimen/spacing_16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_time_ranking">
+
+        <TextView
+            android:id="@+id/tv_no_ranker"
+            style="@style/Widget.TextView.Header.Secondary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/spacing_48dp"
+            android:text="@string/no_ranker"
+            android:textAlignment="center"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/iv_medal_gold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_gold_medal"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_nickname_gold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_nickname_gold" />
+
+        <TextView
+            android:id="@+id/tv_time_gold"
+            style="@style/Widget.TextView.Header.Medium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_nickname_gold"
+            app:layout_constraintEnd_toStartOf="@id/tv_nickname_gold"
+            app:layout_constraintStart_toEndOf="@id/iv_medal_gold"
+            app:layout_constraintTop_toTopOf="@+id/tv_nickname_gold"
+            tools:text="6.028초" />
+
+        <TextView
+            android:id="@+id/tv_nickname_gold"
+            style="@style/Widget.TextView.Body"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_cornflowerblue17_8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="강인혁짱짱짱짱짱짱짱짱짱" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/group_gold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="iv_medal_gold,tv_time_gold,tv_nickname_gold" />
+
+        <ImageView
+            android:id="@+id/iv_medal_silver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_silver_medal"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_nickname_silver"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_nickname_silver" />
+
+        <TextView
+            android:id="@+id/tv_time_silver"
+            style="@style/Widget.TextView.Header.Medium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_nickname_silver"
+            app:layout_constraintEnd_toStartOf="@id/tv_nickname_silver"
+            app:layout_constraintStart_toEndOf="@id/iv_medal_silver"
+            app:layout_constraintTop_toTopOf="@+id/tv_nickname_silver"
+            tools:text="6.028초" />
+
+        <TextView
+            android:id="@+id/tv_nickname_silver"
+            style="@style/Widget.TextView.Body"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_12dp"
+            android:background="@drawable/bg_cornflowerblue17_8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_nickname_gold"
+            tools:text="강인혁짱짱짱짱짱짱짱짱짱" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/group_silver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="iv_medal_silver,tv_time_silver,tv_nickname_silver" />
+
+        <ImageView
+            android:id="@+id/iv_medal_bronze"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_bronze_medal"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_nickname_bronze"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_nickname_bronze" />
+
+        <TextView
+            android:id="@+id/tv_time_bronze"
+            style="@style/Widget.TextView.Header.Medium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_nickname_bronze"
+            app:layout_constraintEnd_toStartOf="@id/tv_nickname_bronze"
+            app:layout_constraintStart_toEndOf="@id/iv_medal_bronze"
+            app:layout_constraintTop_toTopOf="@+id/tv_nickname_bronze"
+            tools:text="6.028초" />
+
+        <TextView
+            android:id="@+id/tv_nickname_bronze"
+            style="@style/Widget.TextView.Body"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_12dp"
+            android:background="@drawable/bg_cornflowerblue17_8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_nickname_silver"
+            tools:text="강인혁짱" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/group_bronze"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="iv_medal_bronze,tv_time_bronze,tv_nickname_bronze" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_24dp"
+        android:layout_marginTop="@dimen/spacing_16dp"
+        android:background="@drawable/bg_cornflowerblue19_15dp"
+        android:paddingHorizontal="@dimen/spacing_24dp"
+        android:paddingVertical="@dimen/spacing_12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cl_ranking">
+
+        <ImageView
+            android:id="@+id/iv_answer_result"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_check"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_nickname"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_nickname" />
+
+        <TextView
+            android:id="@+id/tv_time"
+            style="@style/Widget.TextView.Header.Medium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_nickname"
+            app:layout_constraintEnd_toStartOf="@+id/tv_nickname"
+            app:layout_constraintStart_toEndOf="@+id/iv_answer_result"
+            app:layout_constraintTop_toTopOf="@+id/tv_nickname"
+            tools:text="6.028초" />
+
+        <TextView
+            android:id="@+id/tv_nickname"
+            style="@style/Widget.TextView.Body"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_cornflowerblue17_8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="강인혁짱" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <Button
+        android:id="@+id/btn_result_detail"
+        style="@style/Widget.Button.Primary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_24dp"
+        android:layout_marginBottom="@dimen/spacing_16dp"
+        android:text="@string/go_answer_reason"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/dest_home"
+        android:enabled="true"
+        android:icon="@drawable/ic_home"
+        android:title="@string/home" />
+
+    <item
+        android:id="@+id/dest_search"
+        android:enabled="true"
+        android:icon="@drawable/ic_search"
+        android:title="@string/search" />
+
+    <item
+        android:id="@+id/dest_check"
+        android:enabled="true"
+        android:icon="@drawable/ic_fact_check"
+        android:title="@string/fact_check" />
+
+    <item
+        android:id="@+id/dest_game_start"
+        android:enabled="true"
+        android:icon="@drawable/ic_game"
+        android:title="@string/game" />
+
+    <item
+        android:id="@+id/dest_my_page"
+        android:enabled="true"
+        android:icon="@drawable/ic_my_page"
+        android:title="@string/my" />
+</menu>

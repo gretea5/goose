@@ -1,3 +1,186 @@
 <resources>
-    <string name="app_name">FirstProject</string>
+    <string name="app_name">거위</string>
+
+    <!-- BottomNavigationView -->
+    <string name="home">홈</string>
+    <string name="search">검색</string>
+    <string name="fact_check">분석</string>
+    <string name="game">게임</string>
+    <string name="my">마이</string>
+
+    <string name="image">이미지</string>
+
+    <!-- 게임 -->
+    <string name="game_start">게임하기</string>
+    <string name="game_start_caption">당신은 얼마나 분석력이 있으신가요?\n확인하러 가볼까요?</string>
+    <string name="play">play</string>
+    <string name="answer_selection_button">정답 선택 버튼</string>
+    <string name="news_img">뉴스 이미지</string>
+    <string name="choice_dialog_header">왜 가짜일까요?</string>
+    <string name="result_img">결과 이미지</string>
+    <string name="answer">정답</string>
+    <string name="answer_chart">답안분포</string>
+    <string name="answer_reason">정답이유</string>
+    <string name="answer_time">체류시간</string>
+
+    <string name="result_answer">정답은 %s</string>
+    <string name="result_correct_answer">정답을 고르셨네요!</string>
+    <string name="result_wrong_answer">아쉽게도 오답이네요!</string>
+    <string name="my_answer">내 선택 : %s</string>
+    <string name="time_spent_ranking">체류시간 랭킹</string>
+    <string name="total_time_spent">%.3f초</string>
+    <string name="go_answer_reason">정답 이유 자세히 보기</string>
+    <string name="go_next_game">다른 게임 풀기</string>
+    <string name="no_ranker">랭커가 없습니다</string>
+
+    <string name="choice_real">이건 진짜임ㅇㅇ</string>
+    <string name="choice_fake_news">허위 정보여서 가짜</string>
+    <string name="choice_exaggerated_news">과장 보도여서 가짜</string>
+    <string name="choice_clickbait">클릭베이트여서 가짜</string>
+
+    <string name="real">진짜</string>
+    <string name="fake_news">허위정보</string>
+    <string name="exaggerated_news">과장보도</string>
+    <string name="clickbait">클릭베이트</string>
+    <string name="game_result_login">답안 분포를 확인하기 위해\n로그인이 필요합니다.</string>
+    <string name="go_login">로그인 하기</string>
+
+    <!-- 뉴스 분석 -->
+    <string name="type_img">이미지</string>
+    <string name="type_url">URL</string>
+    <string name="type_content">내용</string>
+
+    <string name='type_img_en'>Image</string>
+    <string name="type_url_en">URL</string>
+    <string name="type_content_en">Content</string>
+
+    <string name="check_news_title">뉴스 분석하기</string>
+    <string name="check_news_subtitle">내가 본 기사는 어느정도 사실일까?\n뉴스를 분석해보세요</string>
+    <string name="check_title_type">분석 타입</string>
+    <string name="check_subtitle_type">어떤 타입을 분석할까요?</string>
+    <string name="content_input_title">컨텐츠 입력</string>
+    <string name="content_input_subtitle">컨텐츠를 선택해주세요.</string>
+    <string name="content_input_hint">컨텐츠 입력</string>
+    <string name="url_input_hint">URL 입력</string>
+    <string name="spell_check_info">검사 버튼을 누르면 분석 성능이 향상됩니다!</string>
+    <string name="spell_check">검사</string>
+    <string name="check">분석하기</string>
+    <string name="use_text">이 텍스트 사용하기</string>
+
+    <!-- 뉴스 분석 결과-->
+    <string name="news_check_result_title">뉴스 분석 결과</string>
+    <string name="news_check_result_subtitle">내가 입력한 컨텐츠를 분석했습니다.</string>
+    <string name="similar_news">유사한 뉴스</string>
+    <string name="truth">신뢰성</string>
+    <string name="ai_whether">AI 여부</string>
+    <string name="bias">편향성</string>
+    <string name="other_check">다른 것도 분석하기</string>
+    <string name="detail">자세히 보기</string>
+    <string name="article_trust_score">해당 기사의\n신뢰도는\n%s 입니다.</string>
+    <string name="url_error">올바른 URL이 아닙니다.</string>
+
+    <string name="check_result_detail_title">결과 자세히보기</string>
+    <string name="check_other_news">다른 것도 분석하러 가기</string>
+    <string name="analysis_loading">분석중...</string>
+    <string name="similar_news_content_expand">유사한 뉴스 기사 내용 보기</string>
+    <string name="similar_news_content_collapse">유사한 뉴스 기사 내용 접기</string>
+
+    <!-- 로그인과 회원가입 -->
+    <string name="user_login">로그인</string>
+    <string name="user_id">아이디</string>
+    <string name="user_password">비밀번호</string>
+    <string name="user_password_check">비밀번호 확인</string>
+    <string name="user_auto_login">자동 로그인하기</string>
+    <string name="user_signup">회원가입</string>
+    <string name="user_do_login">로그인하기</string>
+    <string name="user_duplicate_check">중복확인</string>
+    <string name="user_nickname">닉네임</string>
+    <string name="user_do_signup">가입하기</string>
+    <string name="user_limit_message">4~12자 영문 소문자와 숫자 조합으로 입력해주세요.</string>
+    <string name="nickname_limit_message">한글, 영어, 숫자만 사용하여 2~12자로 닉네임을 입력해 주세요.</string>
+    <string name="user_not_correct_message">비밀번호가 일치하지 않습니다.</string>
+    <string name="user_id_message">사용할 수 있는 아이디입니다.</string>
+    <string name="user_password_message">사용할 수 있는 비밀번호입니다.</string>
+    <string name="login_limit_message">아이디와 비밀번호를 입력해주세요.😊</string>
+    <string name="login_success_message">로그인에 성공하였습니다.😊</string>
+    <string name="login_fail_message">로그인에 실패하였습니다. 다시 시도해주세요.😅</string>
+    <string name="signup_success_message">회원 가입에 성공하였습니다.😊</string>
+    <string name="signup_fail_message">회원 가입에 실패하였습니다. 다시 시도해주세요.😅</string>
+    <string name="logout_dialog_message">정말 로그아웃 하시겠습니까?</string>
+    <string name="no">아니요</string>
+    <string name="yes">네</string>
+    <string name="logout_success_message">로그아웃 성공</string>
+
+    <string-array name="check_types">
+        <item>@string/type_img</item>
+        <item>@string/type_url</item>
+        <item>@string/type_content</item>
+    </string-array>
+
+    <string name="content_input_message">내용을 입력해주세요.</string>
+    <string name="url_input_message">URL을 입력해주세요.</string>
+
+    <!-- 이미지 판별 -->
+    <string name="image_check">사진 판별하기</string>
+    <string name="image_check_caption">이 사진은 정말 진실일까요?\n
+사진을 판별해보아요.</string>
+    <string name="ai_check">AI 사진 판별하기</string>
+    <string name="composite_check">합성 사진 판별하기</string>
+
+    <string name="image_add">사진 넣기</string>
+    <string name="image_add_caption">판별할 사진을 선택해주세요.</string>
+
+    <string name="ai_check_result">AI 사진 판별 결과</string>
+    <string name="img_check_result_caption">사진 판별 결과를 알려드릴게요.</string>
+
+    <string name="other_img_check">다른 사진 판별하기</string>
+
+    <!-- 홈 -->
+    <string name="logo">앱 로고</string>
+    <string name="go_news_search">뉴스 검색하러 가기</string>
+    <string name="top_10_news_list">TOP 10 뉴스 보기</string>
+    <string name="top_10_news_list_sub_title">오늘 인기있는 뉴스 10개를 소개합니다.</string>
+    <string name="reliability">신뢰도 %d%%</string>
+
+    <!-- 검색 -->
+    <string name="news_search">뉴스 검색</string>
+    <string name="news_search_caption">궁금한 뉴스를 검색해보세요.</string>
+    <string name="news_search_hint">검색어 입력</string>
+    <string name="no_search">검색 결과가 없습니다.</string>
+
+    <!-- 뉴스 상세 -->
+    <string name="news_detail_title">뉴스 상세보기</string>
+    <string name="go_news_check_result">뉴스판별 결과화면으로 가기</string>
+    <string name="trust_percent">신뢰도</string>
+    <string name="not_trust_percent">불신도</string>
+    <string name="trust_percentage">%d%%</string>
+    <string name="mode_analysis">분석하러 가기</string>
+    <string name="mode_other_analysis">다른 뉴스 분석</string>
+
+    <!-- 마이 페이지 -->
+    <string name="my_page_title">마이 페이지</string>
+    <string name="user_name">%1$s님</string>
+    <string name="my_growth_title">나의 성장은 어느 정도일까?</string>
+    <string name="my_growth_text">총 %1$d문제를 풀어서\n%2$d문제를 맞혔어요!</string>
+    <string name="profile_edit">프로필 수정</string>
+    <string name="my_news_list">분석한 뉴스</string>
+    <string name="logout">로그아웃</string>
+    <string name="login_required_message">로그인이 필요합니다.</string>
+    <string name="mypage_go_login">로그인 하기</string>
+    <string name="mypage_go_signup">회원가입 하기</string>
+
+    <!-- 분석한 뉴스 보기 -->
+    <string name="record_list">분석한 뉴스 보기</string>
+    <string name="no_record_list">분석한 뉴스가 없습니다.</string>
+    <string name="analysisRequestedAt">판단날짜</string>
+    <string name="record_reliability">신뢰도: %d%%</string>
+
+    <!-- 프로필 수정 -->
+    <string name="user_profile_edit">프로필 수정</string>
+    <string name="user_new_password">새 비밀번호</string>
+    <string name="user_new_nickname">새 닉네임</string>
+    <string name="user_do_edit">변경하기</string>
+    <string name="profile_edit_success_message">프로필 수정에 성공하였습니다.😊</string>
+    <string name="profile_edit_fail_message">프로필 수정에 실패하였습니다. 다시 시도해주세요.😅</string>
+
 </resources>

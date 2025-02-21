@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/spacing_24dp">
+
+    <TextView
+        android:id="@+id/tv_news_content"
+        style="@style/Widget.TextView.Body"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="연어초밥을 먹고 샤브샤브를 먹고 아이스 아메리카노를 마시고 디저트 케이크도 먹고 맛있는 걸 많이 먹으면 좋겠네요. 이게 밑으로 길어져야 하고 위로는 고정이 되어야 이거네요 찾았습니다.
+        약간의 퀴즈 진행을 위해 열심히 문장을 써보고 있습니다. 연어초밥을 먹고 샤브샤브를 먹고 아이스 아메리카노를 마시고 디저트 케이크도 먹고 맛있는 걸 많이 먹으면 좋겠네요. 이게 밑으로 길어져야 하고 위로는 고정이 되어야 이거네요 찾았습니다.
+    약간의 퀴즈 진행을 위해 열심히 문장을 써보고 있습니다." />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

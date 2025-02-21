@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tv_img_check_title"
+        style="@style/Widget.TextView.Header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="66dp"
+        android:text="@string/image_check"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_img_check_caption"
+        style="@style/Widget.TextView.Caption.Silver"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="@string/image_check_caption"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_img_check_title" />
+
+    <TextView
+        android:id="@+id/tv_img_input_sub_title"
+        style="@style/Widget.TextView.Header.Secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_24dp"
+        android:layout_marginTop="56dp"
+        android:text="@string/image_add"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_img_check_caption" />
+
+    <TextView
+        android:id="@+id/tv_img_input_sub_caption"
+        style="@style/Widget.TextView.Caption.Silver"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_24dp"
+        android:layout_marginTop="1dp"
+        android:text="@string/image_add_caption"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_img_input_sub_title" />
+
+    <ImageView
+        android:id="@+id/iv_add_image"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/spacing_24dp"
+        android:layout_marginTop="@dimen/spacing_16dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/bg_white_15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.28"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_img_input_sub_caption" />
+
+    <ImageView
+        android:id="@+id/iv_add_image_plus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_add_img_plus"
+        app:layout_constraintBottom_toBottomOf="@id/iv_add_image"
+        app:layout_constraintEnd_toEndOf="@id/iv_add_image"
+        app:layout_constraintStart_toStartOf="@id/iv_add_image"
+        app:layout_constraintTop_toTopOf="@id/iv_add_image" />
+
+    <Button
+        android:id="@+id/btn_ai_check"
+        style="@style/Widget.Button.Primary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_24dp"
+        android:layout_marginBottom="@dimen/spacing_16dp"
+        android:text="@string/ai_check"
+        app:layout_constraintBottom_toTopOf="@id/btn_composite_check"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btn_composite_check"
+        style="@style/Widget.Button.Primary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_24dp"
+        android:layout_marginBottom="@dimen/spacing_24dp"
+        android:text="@string/composite_check"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,105 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/spacing_24dp">
+
+    <TextView
+        android:id="@+id/tv_news_item_content"
+        style="@style/Widget.TextView.Body"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="트럼프 대통령의 이같은 관세 압박, 당장 인접 국가인 캐나다와 멕시코를 향했죠.\n다음 달부터 25% 관세를 물리겠다고 밝혔는데, 먼 나라 얘기 같지만 당장 우리 기업들에게도 그 영향이 미치고 있습니다.\n박경준 기자가 취재했습니다." />
+
+    <TextView
+        android:id="@+id/tv_item_truth"
+        style="@style/Widget.TextView.Rate.Item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_8dp"
+        android:text="@string/truth"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_news_item_content" />
+
+    <ProgressBar
+        android:id="@+id/pb_news_paragraph_truth"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="15dp"
+        android:max="100"
+        android:progressDrawable="@drawable/bg_progress_bar_paragraph"
+        android:layout_marginHorizontal="@dimen/spacing_16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_item_truth"
+        app:layout_constraintEnd_toStartOf="@+id/tv_item_percent"
+        app:layout_constraintStart_toEndOf="@+id/tv_item_truth"
+        app:layout_constraintTop_toTopOf="@+id/tv_item_truth" />
+
+    <TextView
+        android:id="@+id/tv_item_percent"
+        style="@style/Widget.TextView.Rate.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="100%"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_item_truth"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tv_item_truth" />
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_paragraph_area"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/spacing_8dp"
+        android:background="@drawable/bg_lavender_blue_8dp"
+        android:padding="@dimen/spacing_12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_item_truth">
+
+        <ImageView
+            android:id="@+id/iv_item"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_chevron_right"
+            app:layout_constraintHeight_percent="1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.1" />
+
+        <TextView
+            android:id="@+id/tv_result"
+            style="@style/Widget.TextView.Body.Medium"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_8dp"
+            android:layout_marginTop="2dp"
+            android:gravity="center_vertical"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/iv_item"
+            app:layout_constraintTop_toTopOf="@+id/iv_item"
+            tools:text="타 뉴스기사 5건과 비교한 결과 위 문단은 100.00% 확률로 올바른 내용입니다." />
+
+        <TextView
+            android:id="@+id/tv_item_result_detail"
+            style="@style/Widget.TextView.Body"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_8dp"
+            android:textColor="@color/black"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_result"
+            tools:text="신윤정 이코노미스트는 트럼프 행정부는 관세 도입의 정당성을 자국 산업 보호로 전달하려 하지만 비용 상승 및 생산 효율 저하 등의 모습이 나타날 가능성이 높다며 트럼프 행정부는 관세 도입의 정당성을 자국 산업 보호로 전달하려 하지만 비용 상승 및 생산 효율." />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

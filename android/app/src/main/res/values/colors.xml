@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="ic_launcher_background">#FDFDFD</color>
+    <color name="primary">#7189FF</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="sonicSilver">#7A7A7A</color>
+    <color name="lavender">#E0EEFC</color>
+    <color name="lightSilver">#D9D9D9</color>
+    <color name="philippineGray">#8E8E8E</color>
+    <color name="plumpPurple">#624CAB</color>
+    <color name="lavenderBlue">#CFD7FF</color>
+    <color name="graniteGray">#636363</color>
+    <color name="brightGray">#EFEFEF</color>
+    <color name="platinum">#E5E5E5</color>
+    <color name="shadowGray">#1F000000</color>
+    <color name="maximumRed">#db2323</color>
+    <color name="cornflowerBlue17">#2B7189FF</color>
+    <color name="coralReef">#ff7f69</color>
+    <color name="icterine">#efcc00</color>
+    <color name="eucalyptus">#2adba4</color>
+    <color name="chineseWhite">#E0E0E0</color>
+    <color name="cornflowerBlue">#AEBCFD</color>
 </resources>

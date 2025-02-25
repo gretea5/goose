@@ -8,7 +8,7 @@
 <div align="center">
     <!-- 우리 앱 설명 이미지 넣기 -->
     <img 
-        src="./assets/image/project_intro.png" 
+        src="./assets/image/project_intro.jpg" 
         alt="Main"
         style="border-radius: 5px;"/>
 </div>
